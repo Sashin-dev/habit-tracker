@@ -1,0 +1,965 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#14120e">
+<title>Habits · Sashin</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+<style>
+:root {
+  --ink:     #14120e;
+  --paper:   #f6f1e7;
+  --paper2:  #ede7d9;
+  --paper3:  #e4dccb;
+  --gold:    #c4922a;
+  --gold2:   #e0b44a;
+  --red:     #8c3228;
+  --green:   #2e6640;
+  --blue:    #274870;
+  --muted:   #8a7f6a;
+  --border:  #cec5ae;
+  --r:       10px;
+  --sh:      0 2px 16px rgba(0,0,0,0.09);
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;overflow-x:hidden}
+
+body{
+  font-family:'DM Mono',monospace;
+  background:var(--paper);
+  color:var(--ink);
+  min-height:100vh;
+}
+body::after{
+  content:'';position:fixed;inset:0;pointer-events:none;z-index:999;
+  background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
+  opacity:0.5;
+}
+
+/* ── HEADER ── */
+header{
+  background:var(--ink);color:var(--paper);
+  padding:18px 20px 0;
+  position:sticky;top:0;z-index:50;
+}
+.header-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.logo{
+  font-family:'Instrument Serif',serif;font-style:italic;
+  font-size:clamp(19px,4.5vw,26px);letter-spacing:-0.3px;color:var(--gold2)
+}
+.logo em{color:rgba(255,255,255,0.5);font-style:normal;font-size:0.75em}
+.sync-pill{
+  display:flex;align-items:center;gap:6px;
+  font-size:9px;letter-spacing:1px;text-transform:uppercase;
+  color:rgba(255,255,255,0.4);
+  background:rgba(255,255,255,0.06);
+  border:1px solid rgba(255,255,255,0.1);
+  border-radius:20px;padding:5px 10px;cursor:pointer;
+  transition:all 0.2s;
+}
+.sync-pill:hover{background:rgba(255,255,255,0.1)}
+.sdot{width:6px;height:6px;border-radius:50%;background:var(--muted);transition:background 0.3s}
+.sdot.ok{background:#5ec97a;box-shadow:0 0 6px #5ec97a88}
+.sdot.busy{background:var(--gold2);animation:blink 0.8s infinite}
+.sdot.err{background:#e05a4a}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0.3}}
+
+.tabs{
+  display:flex;overflow-x:auto;scrollbar-width:none;
+  border-top:1px solid rgba(255,255,255,0.07);
+  gap:0;padding:0 4px;
+}
+.tabs::-webkit-scrollbar{display:none}
+.tab{
+  padding:11px 15px;font-size:9px;letter-spacing:1.5px;text-transform:uppercase;
+  color:rgba(255,255,255,0.3);cursor:pointer;white-space:nowrap;
+  border-bottom:2px solid transparent;transition:all 0.2s;
+}
+.tab.active{color:var(--gold2);border-bottom-color:var(--gold2)}
+.tab:hover:not(.active){color:rgba(255,255,255,0.6)}
+
+/* ── MAIN ── */
+main{padding:22px 20px;max-width:860px;margin:0 auto;position:relative;z-index:1}
+
+/* ── SETUP OVERLAY ── */
+#setup{
+  position:fixed;inset:0;z-index:100;
+  background:var(--paper);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  padding:28px 24px;
+  animation:fadeUp 0.3s ease;
+}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+.setup-card{
+  width:100%;max-width:460px;
+  background:#fff;border:1px solid var(--border);border-radius:16px;
+  padding:32px 28px;box-shadow:var(--sh);
+}
+.setup-card h2{
+  font-family:'Instrument Serif',serif;font-size:26px;font-style:italic;
+  color:var(--gold);margin-bottom:6px
+}
+.setup-card p{font-size:11px;color:var(--muted);line-height:1.7;margin-bottom:20px}
+.setup-steps{margin-bottom:24px}
+.step{
+  display:flex;gap:12px;align-items:flex-start;
+  padding:10px 0;border-bottom:1px solid var(--paper3);
+  font-size:11px;line-height:1.6;
+}
+.step:last-child{border-bottom:none}
+.step-num{
+  min-width:22px;height:22px;border-radius:50%;
+  background:var(--ink);color:var(--paper);
+  display:flex;align-items:center;justify-content:center;
+  font-size:10px;font-weight:500;margin-top:1px;
+}
+.step a{color:var(--gold);text-decoration:none}
+.step a:hover{text-decoration:underline}
+.step code{
+  background:var(--paper2);padding:1px 5px;border-radius:4px;
+  font-size:10px;color:var(--ink)
+}
+.field{margin-bottom:12px}
+.field label{display:block;font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:5px}
+.field input{
+  width:100%;background:var(--paper2);border:1px solid var(--border);
+  color:var(--ink);font-family:'DM Mono',monospace;font-size:12px;
+  padding:10px 12px;border-radius:8px;outline:none;
+  transition:border-color 0.2s;
+}
+.field input:focus{border-color:var(--gold)}
+.field input::placeholder{color:var(--muted)}
+.btn-primary{
+  width:100%;background:var(--ink);color:var(--paper);
+  border:none;font-family:'DM Mono',monospace;font-size:12px;
+  padding:13px;border-radius:8px;cursor:pointer;
+  letter-spacing:0.5px;transition:background 0.2s;
+}
+.btn-primary:hover{background:#2a2520}
+.setup-err{font-size:11px;color:var(--red);margin-top:8px;display:none}
+
+/* ── SECTION TITLE ── */
+.sec{
+  font-size:9px;letter-spacing:2px;text-transform:uppercase;
+  color:var(--muted);margin-bottom:14px;
+  display:flex;align-items:center;gap:8px;
+}
+.sec::after{content:'';flex:1;height:1px;background:var(--border)}
+
+/* ── TODAY ── */
+.today-top{display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:24px}
+.today-date .wd{font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:3px}
+.today-date .dm{font-family:'Instrument Serif',serif;font-size:clamp(30px,7vw,52px);font-weight:400;line-height:1;color:var(--ink)}
+
+/* Progress ring */
+.ring-wrap{display:flex;flex-direction:column;align-items:center;gap:4px}
+.ring-wrap .rlabel{font-size:9px;letter-spacing:1px;text-transform:uppercase;color:var(--muted)}
+.ring-svg{transform:rotate(-90deg)}
+.ring-bg{fill:none;stroke:var(--paper3);stroke-width:5}
+.ring-fg{fill:none;stroke:var(--gold);stroke-width:5;stroke-linecap:round;transition:stroke-dashoffset 0.5s cubic-bezier(.4,0,.2,1)}
+.ring-num{fill:var(--gold);font-family:'Instrument Serif',serif;font-size:15px;dominant-baseline:middle;text-anchor:middle}
+
+/* Habit cards */
+.habits-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px}
+.hcard{
+  background:#fff;border:1px solid var(--border);border-radius:var(--r);
+  padding:14px 16px;display:flex;align-items:center;gap:12px;
+  cursor:pointer;transition:all 0.18s;position:relative;overflow:hidden;
+  box-shadow:0 1px 4px rgba(0,0,0,0.05);
+}
+.hcard::before{
+  content:'';position:absolute;left:0;top:0;bottom:0;width:3px;
+  background:var(--border);transition:background 0.2s;
+}
+.hcard:hover{border-color:var(--gold);transform:translateY(-1px);box-shadow:0 4px 14px rgba(0,0,0,0.09)}
+.hcard:active{transform:translateY(0)}
+.hcard.done{border-color:var(--green);background:#f5fbf6}
+.hcard.done::before{background:var(--green)}
+.hcard.done .hname{color:var(--muted);text-decoration:line-through}
+.hcard.done:hover{border-color:var(--green)}
+.hemoji{font-size:24px;width:36px;text-align:center;flex-shrink:0}
+.hinfo{flex:1;min-width:0}
+.hname{font-size:12px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hstreak{font-size:9px;color:var(--muted);margin-top:3px}
+.hstreak b{color:var(--gold);font-weight:500}
+.chk{
+  width:28px;height:28px;border-radius:50%;
+  border:2px solid var(--border);background:transparent;
+  display:flex;align-items:center;justify-content:center;
+  flex-shrink:0;font-size:13px;color:transparent;
+  transition:all 0.18s;pointer-events:none;
+}
+.hcard.done .chk{background:var(--green);border-color:var(--green);color:#fff}
+
+/* ── WEEK ── */
+.week7{display:grid;grid-template-columns:repeat(7,1fr);gap:5px;margin-bottom:8px}
+.wlabel{font-size:9px;color:var(--muted);text-align:center;letter-spacing:0.5px;text-transform:uppercase}
+.wcell{
+  aspect-ratio:1;border-radius:7px;
+  background:var(--paper2);border:1px solid var(--border);
+  display:flex;align-items:center;justify-content:center;
+  font-size:10px;font-weight:500;color:var(--muted);
+  cursor:pointer;transition:all 0.15s;
+}
+.wcell:hover{border-color:var(--gold)}
+.wcell.future{opacity:0.35;cursor:default}
+.wcell.all{background:var(--green);border-color:var(--green);color:#fff}
+.wcell.good{background:#7bba8d;border-color:#7bba8d;color:#fff}
+.wcell.half{background:#c4922a;border-color:#c4922a;color:#fff}
+.wcell.low{background:#e0b44a;border-color:#e0b44a;color:#fff}
+.wcell.none{background:var(--red);border-color:var(--red);color:#fff}
+.wcell.today{outline:2px solid var(--gold);outline-offset:2px}
+
+.per-habit-row{
+  background:#fff;border:1px solid var(--border);border-radius:var(--r);
+  padding:12px 14px;margin-bottom:8px;
+  box-shadow:0 1px 4px rgba(0,0,0,0.04);
+}
+.phr-top{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.phr-dots{display:flex;gap:4px}
+.phrdot{width:16px;height:16px;border-radius:4px;flex-shrink:0}
+
+/* ── MISSED ── */
+.missed-card{
+  background:#fff;border:1px solid var(--border);border-radius:var(--r);
+  padding:14px 16px;margin-bottom:10px;
+  box-shadow:0 1px 4px rgba(0,0,0,0.04);
+}
+.missed-top{display:flex;align-items:center;gap:12px;margin-bottom:8px}
+.missed-dots{display:flex;gap:3px;flex-wrap:wrap}
+.mdot{width:10px;height:10px;border-radius:3px}
+
+/* ── HEATMAP ── */
+.heatmap-scroll{overflow-x:auto;padding-bottom:6px}
+.heatmap{
+  display:grid;grid-template-rows:repeat(7,13px);
+  grid-auto-flow:column;gap:3px;
+  min-width:max-content;
+}
+.hcell{width:13px;height:13px;border-radius:3px;background:var(--paper3);transition:opacity 0.2s}
+.hcell:hover{opacity:0.7}
+.h0{background:var(--paper3)}
+.h1{background:#b7dfc4}
+.h2{background:#7bba8d}
+.h3{background:#4d9e63}
+.h4{background:var(--green)}
+.heatmap-legend{display:flex;align-items:center;gap:6px;margin-top:10px;font-size:9px;color:var(--muted)}
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px;margin-top:20px}
+.stat-card{
+  background:#fff;border:1px solid var(--border);border-radius:var(--r);
+  padding:16px;box-shadow:0 1px 4px rgba(0,0,0,0.04);
+}
+.stat-val{font-family:'Instrument Serif',serif;font-size:38px;color:var(--gold);line-height:1}
+.stat-lbl{font-size:9px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-top:4px}
+
+/* ── MANAGE ── */
+.mrow{
+  background:#fff;border:1px solid var(--border);border-radius:var(--r);
+  padding:12px 14px;display:flex;align-items:center;gap:10px;
+  margin-bottom:7px;box-shadow:0 1px 4px rgba(0,0,0,0.04);
+  animation:fadeUp 0.2s ease;
+}
+.mrow .moji{font-size:20px;cursor:pointer;width:30px;text-align:center}
+.mrow input[type=text]{
+  flex:1;background:transparent;border:none;
+  color:var(--ink);font-family:'DM Mono',monospace;font-size:12px;outline:none;
+}
+.mrow .toggle-lbl{
+  display:flex;align-items:center;gap:5px;
+  font-size:9px;letter-spacing:0.5px;color:var(--muted);cursor:pointer;
+}
+.mrow .del{
+  background:none;border:none;color:var(--muted);
+  cursor:pointer;font-size:15px;padding:3px;transition:color 0.15s;
+}
+.mrow .del:hover{color:var(--red)}
+
+.add-row{display:flex;gap:8px;margin-top:14px;flex-wrap:wrap;align-items:center}
+.add-row input{
+  flex:1;min-width:160px;background:#fff;
+  border:1px solid var(--border);color:var(--ink);
+  font-family:'DM Mono',monospace;font-size:12px;
+  padding:10px 12px;border-radius:8px;outline:none;transition:border-color 0.2s;
+}
+.add-row input:focus{border-color:var(--gold)}
+.btn{
+  background:var(--paper2);border:1px solid var(--border);
+  color:var(--ink);font-family:'DM Mono',monospace;font-size:11px;
+  padding:9px 14px;border-radius:8px;cursor:pointer;
+  transition:all 0.18s;letter-spacing:0.3px;
+}
+.btn:hover{border-color:var(--gold);background:var(--paper3)}
+.btn-dark{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.btn-dark:hover{background:#2a2520;border-color:#2a2520}
+.danger-zone{margin-top:28px}
+.danger-btns{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+
+/* ── EMOJI MODAL ── */
+.overlay{
+  position:fixed;inset:0;background:rgba(20,18,14,0.65);
+  backdrop-filter:blur(4px);z-index:200;
+  display:none;align-items:center;justify-content:center;padding:24px;
+}
+.overlay.open{display:flex}
+.modal{
+  background:var(--paper);border:1px solid var(--border);border-radius:16px;
+  padding:24px;width:100%;max-width:380px;
+  animation:fadeUp 0.2s ease;box-shadow:0 8px 32px rgba(0,0,0,0.15);
+}
+.modal h3{font-family:'Instrument Serif',serif;font-size:20px;font-style:italic;margin-bottom:14px;color:var(--gold)}
+.egrid{display:grid;grid-template-columns:repeat(8,1fr);gap:6px;margin-bottom:14px}
+.eopt{font-size:20px;padding:7px;border-radius:7px;cursor:pointer;text-align:center;transition:background 0.15s;border:1px solid transparent}
+.eopt:hover,.eopt.sel{background:var(--paper3);border-color:var(--border)}
+
+/* Day modal */
+.drow{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--paper3);font-size:11px}
+.drow:last-child{border-bottom:none}
+
+/* ── TOAST ── */
+.toast{
+  position:fixed;bottom:28px;left:50%;transform:translateX(-50%) translateY(8px);
+  background:var(--ink);color:var(--paper);
+  padding:9px 20px;border-radius:30px;font-size:11px;letter-spacing:0.3px;
+  z-index:500;opacity:0;transition:all 0.25s;pointer-events:none;white-space:nowrap;
+}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+/* ── RESPONSIVE ── */
+@media(max-width:480px){
+  main{padding:16px}
+  .habits-grid{grid-template-columns:1fr}
+  .stats-grid{grid-template-columns:repeat(2,1fr)}
+  header{padding:16px 16px 0}
+}
+</style>
+</head>
+<body>
+
+<!-- SETUP SCREEN -->
+<div id="setup">
+  <div class="setup-card">
+    <h2>First-time Setup</h2>
+    <p>Your habit data will live in a private GitHub Gist — synced across all your devices. This setup runs once per browser (token is stored in the URL hash, so it's cache-proof).</p>
+    <div class="setup-steps">
+      <div class="step"><div class="step-num">1</div><div>Go to <a href="https://github.com/settings/tokens/new" target="_blank">github.com/settings/tokens/new</a> → Note: <code>habits</code> → Expiration: <code>No expiration</code> → Scope: check <code>gist</code> only → click <b>Generate token</b> → copy it.</div></div>
+      <div class="step"><div class="step-num">2</div><div>Go to <a href="https://gist.github.com" target="_blank">gist.github.com</a> → Description: <code>habits-data</code> → Filename: <code>habits.json</code> → Content: <code>{}</code> → click <b>Create secret gist</b> → copy the Gist ID from the URL (the long string after your username).</div></div>
+      <div class="step"><div class="step-num">3</div><div>Paste both below. The URL will update — <b>bookmark that URL</b>. On any new device, just open that bookmark and you're synced instantly.</div></div>
+    </div>
+    <div class="field"><label>GitHub Personal Access Token</label><input id="inToken" type="password" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx"></div>
+    <div class="field"><label>Gist ID</label><input id="inGist" type="text" placeholder="a1b2c3d4e5f6..."></div>
+    <button class="btn-primary" onclick="saveSetup()">Save & Start Tracking →</button>
+    <div class="setup-err" id="setupErr"></div>
+  </div>
+</div>
+
+<!-- MAIN APP -->
+<div id="app" style="display:none">
+  <header>
+    <div class="header-top">
+      <div class="logo">Habits <em>·</em> Sashin</div>
+      <div class="sync-pill" onclick="manualSync()" title="Click to sync now">
+        <div class="sdot" id="sdot"></div>
+        <span id="slabel">synced</span>
+      </div>
+    </div>
+    <div class="tabs">
+      <div class="tab active" data-tab="today" onclick="showTab('today')">Today</div>
+      <div class="tab" data-tab="week" onclick="showTab('week')">Week</div>
+      <div class="tab" data-tab="missed" onclick="showTab('missed')">Missed</div>
+      <div class="tab" data-tab="heatmap" onclick="showTab('heatmap')">Heatmap</div>
+      <div class="tab" data-tab="manage" onclick="showTab('manage')">Manage</div>
+    </div>
+  </header>
+
+  <main>
+    <!-- TODAY -->
+    <div id="tab-today">
+      <div class="today-top">
+        <div class="today-date">
+          <div class="wd" id="todayWd"></div>
+          <div class="dm" id="todayDm"></div>
+        </div>
+        <div class="ring-wrap">
+          <svg width="68" height="68" class="ring-svg" viewBox="0 0 68 68">
+            <circle class="ring-bg" cx="34" cy="34" r="28"/>
+            <circle class="ring-fg" id="ringFg" cx="34" cy="34" r="28"
+              stroke-dasharray="175.9" stroke-dashoffset="175.9"/>
+            <text x="34" y="34" class="ring-num" transform="rotate(90,34,34)" id="ringTxt">0</text>
+          </svg>
+          <div class="rlabel" id="ringFrac">0/0</div>
+        </div>
+      </div>
+      <div class="habits-grid" id="habitCards"></div>
+    </div>
+
+    <!-- WEEK -->
+    <div id="tab-week" style="display:none">
+      <div class="sec">This Week</div>
+      <div class="week7" id="weekLabels"></div>
+      <div class="week7" id="weekCells"></div>
+      <div class="sec" style="margin-top:24px">Per Habit</div>
+      <div id="weekPerHabit"></div>
+    </div>
+
+    <!-- MISSED -->
+    <div id="tab-missed" style="display:none">
+      <div class="sec">Habits Missed · Last 30 Days</div>
+      <div id="missedList"></div>
+    </div>
+
+    <!-- HEATMAP -->
+    <div id="tab-heatmap" style="display:none">
+      <div class="sec">90-Day Heatmap</div>
+      <div class="heatmap-scroll"><div class="heatmap" id="heatmap"></div></div>
+      <div class="heatmap-legend">
+        <span>Less</span>
+        <div class="hcell h0"></div><div class="hcell h1"></div>
+        <div class="hcell h2"></div><div class="hcell h3"></div>
+        <div class="hcell h4"></div>
+        <span>More</span>
+      </div>
+      <div class="stats-grid" id="statsGrid"></div>
+    </div>
+
+    <!-- MANAGE -->
+    <div id="tab-manage" style="display:none">
+      <div class="sec">Your Habits</div>
+      <div id="manageList"></div>
+      <div class="add-row">
+        <input id="newName" type="text" placeholder="New habit name..." onkeydown="if(event.key==='Enter')addHabit()">
+        <button class="btn" id="emojiBtn" onclick="openEmoji(null)" style="font-size:16px;padding:9px 12px">🌟</button>
+        <button class="btn btn-dark" onclick="addHabit()">+ Add</button>
+      </div>
+      <div class="danger-zone">
+        <div class="sec">Settings</div>
+        <div class="danger-btns">
+          <button class="btn" onclick="exportJSON()">⬇ Export JSON</button>
+          <button class="btn" onclick="document.getElementById('importFile').click()">⬆ Import JSON</button>
+          <button class="btn" onclick="resetSetup()">⚙ Reset Setup</button>
+        </div>
+        <input type="file" id="importFile" accept=".json" style="display:none" onchange="importJSON(event)">
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- Emoji picker -->
+<div class="overlay" id="emojiOverlay">
+  <div class="modal">
+    <h3>Pick Emoji</h3>
+    <div class="egrid" id="emojiGrid"></div>
+    <button class="btn" onclick="closeEmoji()">Cancel</button>
+  </div>
+</div>
+
+<!-- Day detail -->
+<div class="overlay" id="dayOverlay">
+  <div class="modal">
+    <h3 id="dayTitle"></h3>
+    <div id="dayBody"></div>
+    <button class="btn" style="margin-top:14px" onclick="document.getElementById('dayOverlay').classList.remove('open')">Close</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ══════════════════════════════════════════
+//  CONFIG — stored in URL hash (cache-proof)
+// ══════════════════════════════════════════
+const HASH_KEY = 'hcfg';
+
+function getConfig() {
+  try {
+    const h = location.hash.slice(1);
+    if (!h) return null;
+    const obj = JSON.parse(atob(h));
+    if (obj.t && obj.g) return obj; // token, gist
+  } catch(e) {}
+  return null;
+}
+
+function setConfig(token, gist) {
+  location.hash = btoa(JSON.stringify({ t: token, g: gist }));
+}
+
+// ══════════════════════════════════════════
+//  GIST API
+// ══════════════════════════════════════════
+const FILENAME = 'habits.json';
+let cfg = null;
+let saveTimer = null;
+
+async function gistLoad() {
+  setSyncState('busy', 'loading…');
+  try {
+    const r = await fetch(`https://api.github.com/gists/${cfg.g}`, {
+      headers: { Authorization: `token ${cfg.t}`, Accept: 'application/vnd.github.v3+json' }
+    });
+    if (!r.ok) throw new Error('load failed');
+    const j = await r.json();
+    const raw = j.files[FILENAME]?.content || '{}';
+    const parsed = JSON.parse(raw);
+    // migrate: if parsed has habits array it's our format
+    if (parsed.habits && parsed.log) {
+      data = parsed;
+    } else {
+      // first load — init with defaults
+      data = { habits: DEFAULT_HABITS(), log: {} };
+      await gistSave();
+    }
+    setSyncState('ok', 'synced');
+  } catch(e) {
+    setSyncState('err', 'error');
+    showToast('⚠ Could not load from Gist');
+  }
+}
+
+async function gistSave() {
+  setSyncState('busy', 'saving…');
+  try {
+    const body = { files: { [FILENAME]: { content: JSON.stringify(data, null, 2) } } };
+    const r = await fetch(`https://api.github.com/gists/${cfg.g}`, {
+      method: 'PATCH',
+      headers: {
+        Authorization: `token ${cfg.t}`,
+        'Content-Type': 'application/json',
+        Accept: 'application/vnd.github.v3+json'
+      },
+      body: JSON.stringify(body)
+    });
+    if (!r.ok) throw new Error('save failed');
+    setSyncState('ok', 'synced');
+  } catch(e) {
+    setSyncState('err', 'save failed');
+    showToast('⚠ Save failed — check connection');
+  }
+}
+
+function scheduleSave() {
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(gistSave, 1200);
+}
+
+function setSyncState(state, label) {
+  const dot = document.getElementById('sdot');
+  const lbl = document.getElementById('slabel');
+  dot.className = 'sdot ' + state;
+  if (lbl) lbl.textContent = label;
+}
+
+async function manualSync() {
+  await gistLoad();
+  renderCurrent();
+  showToast('↻ Synced from Gist');
+}
+
+// ══════════════════════════════════════════
+//  DATA
+// ══════════════════════════════════════════
+const DEFAULT_HABITS = () => [
+  { id:'wake',    name:'Wake Up Early',   emoji:'🌅', active:true },
+  { id:'guitar',  name:'Guitar',          emoji:'🎸', active:true },
+  { id:'gym',     name:'Gym',             emoji:'💪', active:true },
+  { id:'lc',      name:'LeetCode',        emoji:'💻', active:true },
+  { id:'ai',      name:'AI Practice',     emoji:'🤖', active:true },
+  { id:'journal', name:'Journal',         emoji:'📓', active:true },
+  { id:'rose',    name:'Rosemary Spray',  emoji:'🌿', active:true },
+  { id:'brush',   name:'Brush Twice',     emoji:'🪥', active:true },
+];
+
+let data = { habits: DEFAULT_HABITS(), log: {} };
+let currentTab = 'today';
+
+// ══════════════════════════════════════════
+//  DATE HELPERS
+// ══════════════════════════════════════════
+const today = () => new Date().toISOString().slice(0,10);
+
+function dateRange(n) {
+  return Array.from({length:n}, (_,i) => {
+    const d = new Date(); d.setDate(d.getDate() - (n-1-i));
+    return d.toISOString().slice(0,10);
+  });
+}
+
+function weekDates() {
+  const d = new Date();
+  const day = d.getDay() || 7;
+  return Array.from({length:7}, (_,i) => {
+    const dd = new Date(d);
+    dd.setDate(d.getDate() - (day-1) + i);
+    return dd.toISOString().slice(0,10);
+  });
+}
+
+function fmtDate(s) {
+  return new Date(s+'T00:00:00').toLocaleDateString('en-IN',{weekday:'short',day:'numeric',month:'short'});
+}
+
+// ══════════════════════════════════════════
+//  STREAK
+// ══════════════════════════════════════════
+function streak(hid) {
+  let n = 0, d = new Date();
+  const t = today();
+  if (!data.log[t]?.[hid]) d.setDate(d.getDate()-1);
+  while(true) {
+    const s = d.toISOString().slice(0,10);
+    if (data.log[s]?.[hid]) { n++; d.setDate(d.getDate()-1); } else break;
+    if (n > 365) break;
+  }
+  return n;
+}
+
+// ══════════════════════════════════════════
+//  TOGGLE
+// ══════════════════════════════════════════
+function toggle(hid) {
+  const t = today();
+  if (!data.log[t]) data.log[t] = {};
+  data.log[t][hid] = !data.log[t][hid];
+  scheduleSave();
+  renderToday();
+  showToast(data.log[t][hid] ? '✓ Done!' : 'Unmarked');
+}
+
+// ══════════════════════════════════════════
+//  RENDER TODAY
+// ══════════════════════════════════════════
+function renderToday() {
+  const t = today();
+  const d = new Date();
+  document.getElementById('todayWd').textContent =
+    d.toLocaleDateString('en-IN',{weekday:'long'});
+  document.getElementById('todayDm').textContent =
+    d.toLocaleDateString('en-IN',{day:'numeric',month:'long'});
+
+  const active = data.habits.filter(h=>h.active);
+  const done = active.filter(h=>data.log[t]?.[h.id]).length;
+  const total = active.length;
+  const pct = total ? done/total : 0;
+  const C = 175.9;
+  document.getElementById('ringFg').style.strokeDashoffset = C*(1-pct);
+  document.getElementById('ringTxt').textContent = Math.round(pct*100)+'%';
+  document.getElementById('ringFrac').textContent = `${done}/${total}`;
+
+  document.getElementById('habitCards').innerHTML = active.map(h => {
+    const isDone = !!data.log[t]?.[h.id];
+    const s = streak(h.id);
+    return `<div class="hcard${isDone?' done':''}" onclick="toggle('${h.id}')">
+      <div class="hemoji">${h.emoji}</div>
+      <div class="hinfo">
+        <div class="hname">${h.name}</div>
+        <div class="hstreak">Streak: <b>${s} day${s!==1?'s':''}</b></div>
+      </div>
+      <div class="chk">${isDone?'✓':''}</div>
+    </div>`;
+  }).join('');
+}
+
+// ══════════════════════════════════════════
+//  RENDER WEEK
+// ══════════════════════════════════════════
+function renderWeek() {
+  const days = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+  const dates = weekDates();
+  const t = today();
+  const active = data.habits.filter(h=>h.active);
+
+  document.getElementById('weekLabels').innerHTML =
+    days.map(d=>`<div class="wlabel">${d}</div>`).join('');
+
+  document.getElementById('weekCells').innerHTML = dates.map((date,i) => {
+    const log = data.log[date]||{};
+    const done = active.filter(h=>log[h.id]).length;
+    const total = active.length;
+    const isPast = date <= t;
+    const isT = date === t;
+    let cls = isPast && total>0 ? (() => {
+      const r = done/total;
+      if(r===1) return 'all';
+      if(r>=0.7) return 'good';
+      if(r>=0.4) return 'half';
+      if(r>0) return 'low';
+      return 'none';
+    })() : 'future';
+    return `<div class="wcell ${cls}${isT?' today':''}" onclick="openDay('${date}')" title="${fmtDate(date)}: ${done}/${total}">
+      ${isPast&&done>0?done:''}
+    </div>`;
+  }).join('');
+
+  document.getElementById('weekPerHabit').innerHTML = active.map(h => {
+    const dots = dates.map(date => {
+      const isPast = date <= t;
+      const done = data.log[date]?.[h.id];
+      const bg = !isPast ? 'var(--paper3)' : done ? 'var(--green)' : 'var(--red)';
+      return `<div class="phrdot" style="background:${bg}" title="${date}"></div>`;
+    }).join('');
+    const wd = dates.filter(d=>d<=t&&data.log[d]?.[h.id]).length;
+    const wt = dates.filter(d=>d<=t).length;
+    return `<div class="per-habit-row">
+      <div class="phr-top">
+        <span style="font-size:18px">${h.emoji}</span>
+        <span style="font-size:12px;font-weight:500;flex:1">${h.name}</span>
+        <span style="font-size:10px;color:var(--muted)">${wd}/${wt}</span>
+      </div>
+      <div class="phr-dots">${dots}</div>
+    </div>`;
+  }).join('');
+}
+
+// ══════════════════════════════════════════
+//  RENDER MISSED
+// ══════════════════════════════════════════
+function renderMissed() {
+  const range = dateRange(30);
+  const t = today();
+  const active = data.habits.filter(h=>h.active);
+
+  const rows = active.map(h => {
+    const missed = range.filter(d=>d<t&&!data.log[d]?.[h.id]).length;
+    const dots = range.map(d => {
+      if(d>t) return '';
+      const done = data.log[d]?.[h.id];
+      return `<div class="mdot" style="background:${done?'var(--green)':'var(--red)'}" title="${d}"></div>`;
+    }).join('');
+    return {h, missed, dots};
+  }).sort((a,b)=>b.missed-a.missed);
+
+  document.getElementById('missedList').innerHTML = rows.map(({h,missed,dots}) =>
+    `<div class="missed-card">
+      <div class="missed-top">
+        <span style="font-size:22px">${h.emoji}</span>
+        <div style="flex:1">
+          <div style="font-size:12px;font-weight:500">${h.name}</div>
+          <div style="font-size:10px;color:${missed>10?'var(--red)':missed>5?'var(--gold)':'var(--muted)'};margin-top:2px">
+            ${missed} missed in last 30 days
+          </div>
+        </div>
+      </div>
+      <div class="missed-dots">${dots}</div>
+    </div>`
+  ).join('');
+}
+
+// ══════════════════════════════════════════
+//  RENDER HEATMAP
+// ══════════════════════════════════════════
+function renderHeatmap() {
+  const range = dateRange(91);
+  const t = today();
+  const active = data.habits.filter(h=>h.active);
+
+  document.getElementById('heatmap').innerHTML = range.map(date => {
+    if(date>t) return `<div class="hcell h0"></div>`;
+    const log = data.log[date]||{};
+    const done = active.filter(h=>log[h.id]).length;
+    const total = active.length;
+    const r = total ? done/total : 0;
+    const lvl = r===0?0:r<=0.25?1:r<=0.5?2:r<=0.75?3:4;
+    return `<div class="hcell h${lvl}" title="${date}: ${done}/${total}"></div>`;
+  }).join('');
+
+  const past = range.filter(d=>d<=t);
+  const totalDone = past.reduce((s,d)=>s+active.filter(h=>data.log[d]?.[h.id]).length,0);
+  const possible = past.length * active.length;
+  const perfect = past.filter(d=>active.every(h=>data.log[d]?.[h.id])).length;
+
+  // Best overall streak
+  let best=0, cur=0;
+  past.forEach(d=>{
+    const all = active.length>0&&active.every(h=>data.log[d]?.[h.id]);
+    if(all){cur++;best=Math.max(best,cur);}else cur=0;
+  });
+  // Current overall streak
+  let cStr=0; const dd=new Date();
+  dd.setDate(dd.getDate()-1);
+  while(true){
+    const s=dd.toISOString().slice(0,10);
+    if(active.every(h=>data.log[s]?.[h.id])){cStr++;dd.setDate(dd.getDate()-1);}else break;
+    if(cStr>365)break;
+  }
+
+  document.getElementById('statsGrid').innerHTML = [
+    {v:totalDone, l:'Total Completions'},
+    {v:perfect,   l:'Perfect Days'},
+    {v:best,      l:'Best Streak'},
+    {v:cStr,      l:'Current Streak'},
+    {v:possible?Math.round(totalDone/possible*100)+'%':'—', l:'Completion Rate'},
+    {v:active.length, l:'Active Habits'},
+  ].map(s=>`<div class="stat-card"><div class="stat-val">${s.v}</div><div class="stat-lbl">${s.l}</div></div>`).join('');
+}
+
+// ══════════════════════════════════════════
+//  RENDER MANAGE
+// ══════════════════════════════════════════
+function renderManage() {
+  document.getElementById('manageList').innerHTML = data.habits.map((h,i)=>`
+    <div class="mrow">
+      <span class="moji" onclick="openEmoji(${i})">${h.emoji}</span>
+      <input type="text" value="${h.name}" onchange="data.habits[${i}].name=this.value;scheduleSave()">
+      <label class="toggle-lbl">
+        <input type="checkbox" ${h.active?'checked':''} onchange="data.habits[${i}].active=this.checked;scheduleSave();renderManage()">
+        Active
+      </label>
+      <button class="del" onclick="delHabit(${i})">✕</button>
+    </div>
+  `).join('');
+}
+
+function delHabit(i) {
+  if(!confirm(`Delete "${data.habits[i].name}"? Log history is kept.`)) return;
+  data.habits.splice(i,1); scheduleSave(); renderManage();
+}
+
+function addHabit() {
+  const name = document.getElementById('newName').value.trim();
+  if(!name) return;
+  const emoji = document.getElementById('emojiBtn').textContent;
+  data.habits.push({id:'h'+Date.now(), name, emoji, active:true});
+  scheduleSave();
+  document.getElementById('newName').value='';
+  document.getElementById('emojiBtn').textContent='🌟';
+  renderManage(); showToast('Habit added!');
+}
+
+// ══════════════════════════════════════════
+//  EMOJI PICKER
+// ══════════════════════════════════════════
+const EMOJIS=['🌅','🎸','💪','💻','🤖','📓','🌿','🪥','🧘','🏃','🥊','🎹',
+  '📚','🎯','💧','🛌','🧠','✍️','🎨','🎵','🌱','🔥','⚡','🌟','🏋️','📖',
+  '🥗','☕','🧘','🎤','🎭','🌍'];
+let emojiTarget = null;
+
+function openEmoji(idx) {
+  emojiTarget = idx;
+  document.getElementById('emojiGrid').innerHTML =
+    EMOJIS.map(e=>`<div class="eopt" onclick="pickEmoji('${e}')">${e}</div>`).join('');
+  document.getElementById('emojiOverlay').classList.add('open');
+}
+function closeEmoji() { document.getElementById('emojiOverlay').classList.remove('open'); }
+function pickEmoji(e) {
+  if(emojiTarget===null) document.getElementById('emojiBtn').textContent=e;
+  else { data.habits[emojiTarget].emoji=e; scheduleSave(); renderManage(); }
+  closeEmoji();
+}
+
+// ══════════════════════════════════════════
+//  DAY DETAIL
+// ══════════════════════════════════════════
+function openDay(date) {
+  const active = data.habits.filter(h=>h.active);
+  const log = data.log[date]||{};
+  document.getElementById('dayTitle').textContent = fmtDate(date);
+  document.getElementById('dayBody').innerHTML = active.map(h=>
+    `<div class="drow">
+      <span style="font-size:16px">${h.emoji}</span>
+      <span style="flex:1">${h.name}</span>
+      <span>${log[h.id]?'✅':'❌'}</span>
+    </div>`
+  ).join('');
+  document.getElementById('dayOverlay').classList.add('open');
+}
+
+// ══════════════════════════════════════════
+//  TABS
+// ══════════════════════════════════════════
+function showTab(name) {
+  currentTab = name;
+  ['today','week','missed','heatmap','manage'].forEach(t=>{
+    document.getElementById('tab-'+t).style.display = t===name?'block':'none';
+    document.querySelector(`[data-tab="${t}"]`).classList.toggle('active', t===name);
+  });
+  renderCurrent();
+}
+
+function renderCurrent() {
+  if(currentTab==='today') renderToday();
+  else if(currentTab==='week') renderWeek();
+  else if(currentTab==='missed') renderMissed();
+  else if(currentTab==='heatmap') renderHeatmap();
+  else if(currentTab==='manage') renderManage();
+}
+
+// ══════════════════════════════════════════
+//  TOAST
+// ══════════════════════════════════════════
+let toastTimer;
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(()=>t.classList.remove('show'), 2000);
+}
+
+// ══════════════════════════════════════════
+//  EXPORT / IMPORT
+// ══════════════════════════════════════════
+function exportJSON() {
+  const blob = new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `habits_${today()}.json`; a.click();
+}
+function importJSON(e) {
+  const file = e.target.files[0]; if(!file) return;
+  const r = new FileReader();
+  r.onload = ev => {
+    try { data = JSON.parse(ev.target.result); gistSave(); renderCurrent(); showToast('Imported!'); }
+    catch(err) { alert('Invalid JSON file.'); }
+  };
+  r.readAsText(file); e.target.value='';
+}
+
+// ══════════════════════════════════════════
+//  SETUP
+// ══════════════════════════════════════════
+async function saveSetup() {
+  const token = document.getElementById('inToken').value.trim();
+  const gist = document.getElementById('inGist').value.trim();
+  const err = document.getElementById('setupErr');
+  err.style.display='none';
+  if(!token || !gist) { err.textContent='Both fields are required.'; err.style.display='block'; return; }
+  // test
+  try {
+    const r = await fetch(`https://api.github.com/gists/${gist}`, {
+      headers:{Authorization:`token ${token}`}
+    });
+    if(!r.ok) throw new Error('invalid');
+  } catch(e) {
+    err.textContent='Could not connect — check your token and Gist ID.';
+    err.style.display='block'; return;
+  }
+  setConfig(token, gist);
+  await initApp();
+}
+
+function resetSetup() {
+  if(!confirm('Reset setup? Your Gist data is safe.')) return;
+  location.hash = '';
+  location.reload();
+}
+
+// ══════════════════════════════════════════
+//  INIT
+// ══════════════════════════════════════════
+async function initApp() {
+  cfg = getConfig();
+  if(!cfg) { document.getElementById('setup').style.display='flex'; return; }
+  document.getElementById('setup').style.display='none';
+  document.getElementById('app').style.display='block';
+  await gistLoad();
+  renderToday();
+  // Auto-sync every 60 seconds
+  setInterval(()=>gistLoad().then(renderCurrent), 60000);
+}
+
+initApp();
+</script>
+</body>
+</html>
