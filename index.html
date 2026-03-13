@@ -293,7 +293,7 @@ main{padding:20px;max-width:860px;margin:0 auto;position:relative;z-index:1}
     <div class="steps">
       <div class="step"><div class="snum">1</div><div>Go to <a href="https://github.com/settings/tokens/new" target="_blank">github.com/settings/tokens/new</a> → Note: <code>habits</code> → Expiration: <code>No expiration</code> → check only ☑ <code>gist</code> → Generate &amp; copy token.</div></div>
       <div class="step"><div class="snum">2</div><div>Go to <a href="https://gist.github.com" target="_blank">gist.github.com</a> → Description: <code>habits-data</code> → Filename: <code>habits.json</code> → Content: <code>{}</code> → Create secret gist → copy the ID from the URL (long string after your username).</div></div>
-      <div class="step"><div class="snum">3</div><div>Fill in below. Profile is saved on this device. On a new device, come back here and add the same profile again with the same token + gist ID.</div></div>
+      <div class="step"><div class="snum">3</div><div>Fill in below and click Save. The URL will update with your config encoded in the hash (<code>#abc123…</code>). <b>Bookmark that URL immediately</b> — it works on any device, any browser, after any cache clear. Share it with no one.</div></div>
     </div>
     <div class="field"><label>Your Name</label><input id="setupName" placeholder="e.g. Sashin or Priya"></div>
     <div class="field"><label>GitHub Token</label><input id="setupToken" type="password" placeholder="ghp_xxxxxxxxxxxx"></div>
@@ -456,8 +456,12 @@ main{padding:20px;max-width:860px;margin:0 auto;position:relative;z-index:1}
         <button class="btn btn-dark" onclick="addHabit()">+ Add</button>
       </div>
 
-      <div class="sec" style="margin-top:22px">Data</div>
+      <div class="sec" style="margin-top:22px">Data & Access</div>
+      <div style="font-size:10px;color:var(--muted);margin-bottom:10px;line-height:1.6">
+        Your profile config is encoded in the URL hash. <b>Bookmark or copy the URL below</b> — opening it on any device gives instant access, even after cache clears.
+      </div>
       <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn btn-dark" onclick="copyMyURL()">🔗 Copy My URL</button>
         <button class="btn" onclick="exportJSON()">⬇ Export JSON</button>
         <button class="btn" onclick="document.getElementById('importFile').click()">⬆ Import JSON</button>
         <button class="btn" onclick="resetProfile()" style="color:var(--red)">✕ Remove Profile</button>
@@ -483,7 +487,7 @@ main{padding:20px;max-width:860px;margin:0 auto;position:relative;z-index:1}
 //  CONSTANTS
 // ═══════════════════════════════════════════════════
 const GIST_FILE    = 'habits.json';
-const PROFILE_KEY  = 'hbt_profiles_v2';
+const PROFILE_KEY  = 'hbt_profiles_v3'; // localStorage cache only — hash is source of truth
 const COLORS       = ['#c4922a','#2e6640','#274870','#8c3228','#5b4c8a','#2a7070','#7a4c2a','#4a4a4a'];
 const EMOJIS       = ['🌅','🎸','💪','💻','🤖','📓','🌿','🪥','🧘','🏃','🥊','🎹',
   '📚','🎯','💧','🛌','🧠','✍️','🎨','🎵','🌱','🔥','⚡','🌟','🏋️','📖',
@@ -513,12 +517,58 @@ let emojiTarget = null;
 let setupColor  = COLORS[0];
 
 // ═══════════════════════════════════════════════════
-//  PROFILE STORAGE
+//  URL HASH CONFIG  ← source of truth, cache-proof
+//  Format: #b64(JSON({profiles:[{id,name,token,gist,color}]}))
+// ═══════════════════════════════════════════════════
+function readHash() {
+  try {
+    const h = location.hash.slice(1);
+    if (!h) return null;
+    return JSON.parse(atob(h));
+  } catch(e) { return null; }
+}
+function writeHash(obj) {
+  // Use replaceState so the hash change doesn't add a history entry
+  history.replaceState(null, '', '#' + btoa(JSON.stringify(obj)));
+}
+function hashAddProfile(prof) {
+  const cur = readHash() || { profiles: [] };
+  // upsert by id
+  const idx = cur.profiles.findIndex(p => p.id === prof.id);
+  if (idx >= 0) cur.profiles[idx] = prof; else cur.profiles.push(prof);
+  writeHash(cur);
+}
+function hashRemoveProfile(id) {
+  const cur = readHash() || { profiles: [] };
+  cur.profiles = cur.profiles.filter(p => p.id !== id);
+  writeHash(cur);
+}
+function hashGetProfiles() {
+  const h = readHash();
+  return h?.profiles || [];
+}
+
+// ═══════════════════════════════════════════════════
+//  PROFILE STORAGE  (localStorage = speed cache only)
 // ═══════════════════════════════════════════════════
 function loadProfiles() {
+  // Hash is the source of truth; localStorage is just a warm cache
+  const fromHash = hashGetProfiles();
+  if (fromHash.length) {
+    profiles = fromHash;
+    localStorage.setItem(PROFILE_KEY, JSON.stringify(profiles)); // keep cache warm
+    return;
+  }
+  // Fallback to localStorage cache (same-device, hash not yet set)
   try { profiles = JSON.parse(localStorage.getItem(PROFILE_KEY)||'[]'); } catch(e){ profiles=[]; }
 }
-function saveProfiles() { localStorage.setItem(PROFILE_KEY, JSON.stringify(profiles)); }
+function saveProfiles() {
+  localStorage.setItem(PROFILE_KEY, JSON.stringify(profiles));
+  // Also persist every profile into the hash
+  const cur = readHash() || { profiles: [] };
+  cur.profiles = profiles;
+  writeHash(cur);
+}
 
 // ═══════════════════════════════════════════════════
 //  GIST API
@@ -807,10 +857,18 @@ function addHabit() {
   renderManage(); showToast('Habit added!');
 }
 function resetProfile() {
-  if(!confirm('Remove this profile from this device? Your Gist data stays safe.')) return;
-  profiles=profiles.filter(p=>p.id!==activeProf.id); saveProfiles();
+  if(!confirm('Remove this profile? Your Gist data stays safe. Re-add it anytime with the same token + Gist ID.')) return;
+  profiles = profiles.filter(p => p.id !== activeProf.id);
+  hashRemoveProfile(activeProf.id);
+  localStorage.setItem(PROFILE_KEY, JSON.stringify(profiles));
   activeProf=null; data={};
   location.reload();
+}
+function copyMyURL() {
+  const url = location.href;
+  navigator.clipboard.writeText(url)
+    .then(() => showToast('✓ URL copied — bookmark this!'))
+    .catch(() => prompt('Copy and bookmark this URL:', url));
 }
 function exportJSON() {
   const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
@@ -1008,7 +1066,8 @@ async function saveSetup() {
   } catch(e){ err.textContent='Could not connect — double-check token and Gist ID.'; err.style.display='block'; return; }
   const id='p'+Date.now();
   const prof={id,name,token,gist,color:setupColor};
-  profiles.push(prof); saveProfiles();
+  profiles.push(prof);
+  saveProfiles(); // writes to localStorage AND URL hash
   activeProf=prof;
   data={name,habits:DEFAULT_HABITS(),log:{},color:setupColor};
   if(pin) data.pin=pin;
@@ -1016,6 +1075,8 @@ async function saveSetup() {
   // clear form
   ['setupName','setupToken','setupGist','setupPin'].forEach(f=>document.getElementById(f).value='');
   launchApp();
+  // nudge user to bookmark
+  setTimeout(()=>showToast('✓ Profile saved — go to Manage → Copy My URL to bookmark!'), 600);
 }
 
 // ═══════════════════════════════════════════════════
