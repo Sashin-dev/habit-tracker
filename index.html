@@ -1,740 +1,2168 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="theme-color" content="#14120e">
-<title>Habits</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
-<style>
-:root{
-  --ink:#14120e;--paper:#f6f1e7;--paper2:#ede7d9;--paper3:#e4dccb;
-  --gold:#c4922a;--gold2:#e0b44a;--red:#8c3228;--green:#2e6640;
-  --muted:#8a7f6a;--border:#cec5ae;--r:10px;
-  --accent:#c4922a;
-}
-*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-html,body{height:100%;overflow-x:hidden}
-body{font-family:'DM Mono',monospace;background:var(--paper);color:var(--ink);min-height:100vh}
-body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:999;
-  background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
-  opacity:0.5}
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, viewport-fit=cover"
+    />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta
+      name="apple-mobile-web-app-status-bar-style"
+      content="black-translucent"
+    />
+    <meta name="theme-color" content="#14120e" />
+    <title>Habits</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Mono:wght@300;400;500&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --ink: #14120e;
+        --paper: #f0ebe0;
+        --paper2: #e6dfd0;
+        --paper3: #dbd2be;
+        --gold: #c4922a;
+        --gold2: #e0b44a;
+        --red: #8c3228;
+        --green: #2e6640;
+        --muted: #8a7f6a;
+        --border: #c8bda6;
+        --r: 12px;
+        --accent: #c4922a;
+      }
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        -webkit-tap-highlight-color: transparent;
+      }
+      html,
+      body {
+        height: 100%;
+        overflow-x: hidden;
+      }
+      body {
+        font-family: "DM Mono", monospace;
+        color: var(--ink);
+        min-height: 100vh;
+        background-color: #e8e0d0;
+        background-image:
+          radial-gradient(
+            ellipse 80% 60% at 15% 10%,
+            rgba(196, 146, 42, 0.13) 0%,
+            transparent 60%
+          ),
+          radial-gradient(
+            ellipse 60% 50% at 85% 80%,
+            rgba(46, 102, 64, 0.1) 0%,
+            transparent 55%
+          ),
+          radial-gradient(
+            ellipse 50% 40% at 50% 50%,
+            rgba(196, 146, 42, 0.05) 0%,
+            transparent 70%
+          ),
+          url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='400'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='400' height='400' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+      }
+      /* Subtle animated shimmer on background */
+      body::before {
+        content: "";
+        position: fixed;
+        inset: 0;
+        pointer-events: none;
+        z-index: 0;
+        background:
+          radial-gradient(
+            ellipse 40% 30% at 70% 20%,
+            rgba(224, 180, 74, 0.08) 0%,
+            transparent 60%
+          ),
+          radial-gradient(
+            ellipse 30% 25% at 20% 75%,
+            rgba(46, 102, 64, 0.07) 0%,
+            transparent 55%
+          );
+        animation: bgshift 18s ease-in-out infinite alternate;
+      }
+      @keyframes bgshift {
+        0% {
+          opacity: 0.6;
+          transform: scale(1) translateY(0);
+        }
+        100% {
+          opacity: 1;
+          transform: scale(1.04) translateY(-8px);
+        }
+      }
 
-/* SCREENS */
-.screen{position:fixed;inset:0;z-index:80;background:var(--paper);
-  display:flex;flex-direction:column;align-items:center;justify-content:center;
-  padding:24px;animation:fadeUp 0.28s ease}
-.screen.hidden{display:none!important}
-@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
-.card{width:100%;max-width:440px;background:#fff;border:1px solid var(--border);
-  border-radius:16px;padding:28px 26px;box-shadow:0 4px 24px rgba(0,0,0,0.08);
-  max-height:92vh;overflow-y:auto}
-.card h2{font-family:'Instrument Serif',serif;font-size:26px;font-style:italic;
-  color:var(--accent);margin-bottom:5px}
-.card p{font-size:11px;color:var(--muted);line-height:1.7;margin-bottom:20px}
-.field{margin-bottom:12px}
-.field label{display:block;font-size:9px;letter-spacing:1.2px;text-transform:uppercase;
-  color:var(--muted);margin-bottom:4px}
-.field input,.field select{width:100%;background:var(--paper2);border:1px solid var(--border);
-  color:var(--ink);font-family:'DM Mono',monospace;font-size:12px;
-  padding:10px 12px;border-radius:8px;outline:none;transition:border-color 0.2s}
-.field input:focus{border-color:var(--accent)}
-.field input::placeholder{color:var(--muted)}
-.btn-primary{width:100%;background:var(--ink);color:var(--paper);border:none;
-  font-family:'DM Mono',monospace;font-size:12px;padding:13px;border-radius:8px;
-  cursor:pointer;letter-spacing:0.5px;transition:background 0.2s;margin-top:4px}
-.btn-primary:hover{background:#2a2520}
-.screen-err{font-size:11px;color:var(--red);margin-top:9px;display:none}
+      /* SCREENS */
+      .screen {
+        position: fixed;
+        inset: 0;
+        z-index: 80;
+        background: linear-gradient(145deg, #ede7d7 0%, #e4dccb 100%);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 24px;
+        animation: fadeUp 0.28s ease;
+      }
+      .screen.hidden {
+        display: none !important;
+      }
+      @keyframes fadeUp {
+        from {
+          opacity: 0;
+          transform: translateY(8px);
+        }
+        to {
+          opacity: 1;
+          transform: none;
+        }
+      }
+      .card {
+        width: 100%;
+        max-width: 440px;
+        background: rgba(255, 255, 255, 0.88);
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        padding: 28px 26px;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        max-height: 92vh;
+        overflow-y: auto;
+        backdrop-filter: blur(8px);
+      }
+      .card h2 {
+        font-family: "Instrument Serif", serif;
+        font-size: 26px;
+        font-style: italic;
+        color: var(--accent);
+        margin-bottom: 5px;
+      }
+      .card p {
+        font-size: 11px;
+        color: var(--muted);
+        line-height: 1.7;
+        margin-bottom: 20px;
+      }
+      .field {
+        margin-bottom: 12px;
+      }
+      .field label {
+        display: block;
+        font-size: 9px;
+        letter-spacing: 1.2px;
+        text-transform: uppercase;
+        color: var(--muted);
+        margin-bottom: 4px;
+      }
+      .field input,
+      .field select {
+        width: 100%;
+        background: var(--paper2);
+        border: 1px solid var(--border);
+        color: var(--ink);
+        font-family: "DM Mono", monospace;
+        font-size: 12px;
+        padding: 10px 12px;
+        border-radius: 8px;
+        outline: none;
+        transition: border-color 0.2s;
+      }
+      .field input:focus {
+        border-color: var(--accent);
+      }
+      .field input::placeholder {
+        color: var(--muted);
+      }
+      .btn-primary {
+        width: 100%;
+        background: var(--ink);
+        color: var(--paper);
+        border: none;
+        font-family: "DM Mono", monospace;
+        font-size: 12px;
+        padding: 13px;
+        border-radius: 8px;
+        cursor: pointer;
+        letter-spacing: 0.5px;
+        transition: background 0.2s;
+        margin-top: 4px;
+      }
+      .btn-primary:hover {
+        background: #2a2520;
+      }
+      .screen-err {
+        font-size: 11px;
+        color: var(--red);
+        margin-top: 9px;
+        display: none;
+      }
 
-/* STEPS */
-.steps{margin-bottom:20px}
-.step{display:flex;gap:10px;align-items:flex-start;padding:8px 0;
-  border-bottom:1px solid var(--paper3);font-size:11px;line-height:1.65}
-.step:last-child{border-bottom:none}
-.snum{min-width:20px;height:20px;border-radius:50%;background:var(--ink);color:var(--paper);
-  display:flex;align-items:center;justify-content:center;font-size:9px;flex-shrink:0;margin-top:2px}
-.step a{color:var(--gold);text-decoration:none}.step a:hover{text-decoration:underline}
-.step code{background:var(--paper2);padding:1px 5px;border-radius:4px;font-size:10px}
+      /* STEPS */
+      .steps {
+        margin-bottom: 20px;
+      }
+      .step {
+        display: flex;
+        gap: 10px;
+        align-items: flex-start;
+        padding: 8px 0;
+        border-bottom: 1px solid var(--paper3);
+        font-size: 11px;
+        line-height: 1.65;
+      }
+      .step:last-child {
+        border-bottom: none;
+      }
+      .snum {
+        min-width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        background: var(--ink);
+        color: var(--paper);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 9px;
+        flex-shrink: 0;
+        margin-top: 2px;
+      }
+      .step a {
+        color: var(--gold);
+        text-decoration: none;
+      }
+      .step a:hover {
+        text-decoration: underline;
+      }
+      .step code {
+        background: var(--paper2);
+        padding: 1px 5px;
+        border-radius: 4px;
+        font-size: 10px;
+      }
 
-/* COLOR PICKER */
-.color-opts{display:flex;gap:7px;flex-wrap:wrap;margin-top:6px}
-.copt{width:26px;height:26px;border-radius:50%;cursor:pointer;border:3px solid transparent;transition:all 0.15s}
-.copt:hover{transform:scale(1.1)}.copt.sel{border-color:var(--ink)}
+      /* COLOR PICKER */
+      .color-opts {
+        display: flex;
+        gap: 7px;
+        flex-wrap: wrap;
+        margin-top: 6px;
+      }
+      .copt {
+        width: 26px;
+        height: 26px;
+        border-radius: 50%;
+        cursor: pointer;
+        border: 3px solid transparent;
+        transition: all 0.15s;
+      }
+      .copt:hover {
+        transform: scale(1.1);
+      }
+      .copt.sel {
+        border-color: var(--ink);
+      }
 
-/* USER SELECT */
-.ulist{display:flex;flex-direction:column;gap:9px;margin-bottom:16px}
-.ubtn{display:flex;align-items:center;gap:13px;padding:13px 15px;
-  background:var(--paper2);border:1px solid var(--border);border-radius:var(--r);
-  cursor:pointer;transition:all 0.18s;text-align:left;width:100%}
-.ubtn:hover{border-color:var(--accent);background:var(--paper3)}
-.uavatar{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;
-  justify-content:center;font-size:15px;font-weight:600;color:#fff;flex-shrink:0}
-.uinfo .un{font-size:13px;font-weight:500}.uinfo .us{font-size:10px;color:var(--muted);margin-top:2px}
-.or-sep{text-align:center;font-size:10px;letter-spacing:1px;text-transform:uppercase;
-  color:var(--muted);margin:4px 0 14px}
-.btn-outline{width:100%;background:transparent;border:1px solid var(--border);color:var(--ink);
-  font-family:'DM Mono',monospace;font-size:11px;padding:11px;border-radius:8px;cursor:pointer;transition:all 0.18s}
-.btn-outline:hover{border-color:var(--accent);color:var(--accent)}
+      /* USER SELECT */
+      .ulist {
+        display: flex;
+        flex-direction: column;
+        gap: 9px;
+        margin-bottom: 16px;
+      }
+      .ubtn {
+        display: flex;
+        align-items: center;
+        gap: 13px;
+        padding: 13px 15px;
+        background: var(--paper2);
+        border: 1px solid var(--border);
+        border-radius: var(--r);
+        cursor: pointer;
+        transition: all 0.18s;
+        text-align: left;
+        width: 100%;
+      }
+      .ubtn:hover {
+        border-color: var(--accent);
+        background: var(--paper3);
+      }
+      .uavatar {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 15px;
+        font-weight: 600;
+        color: #fff;
+        flex-shrink: 0;
+      }
+      .uinfo .un {
+        font-size: 13px;
+        font-weight: 500;
+      }
+      .uinfo .us {
+        font-size: 10px;
+        color: var(--muted);
+        margin-top: 2px;
+      }
+      .or-sep {
+        text-align: center;
+        font-size: 10px;
+        letter-spacing: 1px;
+        text-transform: uppercase;
+        color: var(--muted);
+        margin: 4px 0 14px;
+      }
+      .btn-outline {
+        width: 100%;
+        background: transparent;
+        border: 1px solid var(--border);
+        color: var(--ink);
+        font-family: "DM Mono", monospace;
+        font-size: 11px;
+        padding: 11px;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.18s;
+      }
+      .btn-outline:hover {
+        border-color: var(--accent);
+        color: var(--accent);
+      }
 
-/* PIN */
-.pin-wrap{display:flex;flex-direction:column;align-items:center}
-.pin-greeting{font-family:'Instrument Serif',serif;font-size:15px;font-style:italic;color:var(--muted);margin-bottom:4px}
-.pin-title{font-family:'Instrument Serif',serif;font-size:30px;color:var(--accent);margin-bottom:3px}
-.pin-sub{font-size:9px;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:22px}
-.pin-dots{display:flex;gap:11px;margin-bottom:26px}
-.pdot{width:13px;height:13px;border-radius:50%;border:2px solid var(--border);background:transparent;transition:all 0.15s}
-.pdot.filled{background:var(--accent);border-color:var(--accent)}
-@keyframes shake{0%,100%{transform:translateX(0)}20%,60%{transform:translateX(-5px)}40%,80%{transform:translateX(5px)}}
-.pin-dots.shake{animation:shake 0.35s ease}
-.keypad{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;width:210px}
-.key{aspect-ratio:1;border-radius:12px;background:var(--paper2);border:1px solid var(--border);
-  font-family:'DM Mono',monospace;font-size:17px;font-weight:500;cursor:pointer;
-  display:flex;align-items:center;justify-content:center;transition:all 0.12s;color:var(--ink);user-select:none}
-.key:hover{background:var(--paper3);border-color:var(--accent)}
-.key:active{transform:scale(0.92)}
-.key.del{font-size:13px;color:var(--muted)}.key.empty{cursor:default;background:transparent;border-color:transparent}
-.pin-err{font-size:10px;color:var(--red);margin-top:14px;min-height:14px}
-.pin-switch{margin-top:14px;font-size:10px;color:var(--muted);cursor:pointer;transition:color 0.15s}
-.pin-switch:hover{color:var(--gold)}
+      /* PIN */
+      .pin-wrap {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+      .pin-greeting {
+        font-family: "Instrument Serif", serif;
+        font-size: 15px;
+        font-style: italic;
+        color: var(--muted);
+        margin-bottom: 4px;
+      }
+      .pin-title {
+        font-family: "Instrument Serif", serif;
+        font-size: 30px;
+        color: var(--accent);
+        margin-bottom: 3px;
+      }
+      .pin-sub {
+        font-size: 9px;
+        color: var(--muted);
+        letter-spacing: 1.5px;
+        text-transform: uppercase;
+        margin-bottom: 22px;
+      }
+      .pin-dots {
+        display: flex;
+        gap: 11px;
+        margin-bottom: 26px;
+      }
+      .pdot {
+        width: 13px;
+        height: 13px;
+        border-radius: 50%;
+        border: 2px solid var(--border);
+        background: transparent;
+        transition: all 0.15s;
+      }
+      .pdot.filled {
+        background: var(--accent);
+        border-color: var(--accent);
+      }
+      @keyframes shake {
+        0%,
+        100% {
+          transform: translateX(0);
+        }
+        20%,
+        60% {
+          transform: translateX(-5px);
+        }
+        40%,
+        80% {
+          transform: translateX(5px);
+        }
+      }
+      .pin-dots.shake {
+        animation: shake 0.35s ease;
+      }
+      .keypad {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 9px;
+        width: 210px;
+      }
+      .key {
+        aspect-ratio: 1;
+        border-radius: 12px;
+        background: var(--paper2);
+        border: 1px solid var(--border);
+        font-family: "DM Mono", monospace;
+        font-size: 17px;
+        font-weight: 500;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.12s;
+        color: var(--ink);
+        user-select: none;
+      }
+      .key:hover {
+        background: var(--paper3);
+        border-color: var(--accent);
+      }
+      .key:active {
+        transform: scale(0.92);
+      }
+      .key.del {
+        font-size: 13px;
+        color: var(--muted);
+      }
+      .key.empty {
+        cursor: default;
+        background: transparent;
+        border-color: transparent;
+      }
+      .pin-err {
+        font-size: 10px;
+        color: var(--red);
+        margin-top: 14px;
+        min-height: 14px;
+      }
+      .pin-switch {
+        margin-top: 14px;
+        font-size: 10px;
+        color: var(--muted);
+        cursor: pointer;
+        transition: color 0.15s;
+      }
+      .pin-switch:hover {
+        color: var(--gold);
+      }
 
-/* HEADER */
-header{background:var(--ink);color:var(--paper);padding:16px 20px 0;position:sticky;top:0;z-index:50}
-.htop{display:flex;align-items:center;justify-content:space-between;margin-bottom:13px;gap:10px}
-.logo{font-family:'Instrument Serif',serif;font-style:italic;font-size:clamp(16px,4vw,22px);color:var(--gold2)}
-.header-right{display:flex;align-items:center;gap:7px}
-.hpill{display:flex;align-items:center;gap:5px;font-size:9px;letter-spacing:1px;text-transform:uppercase;
-  color:rgba(255,255,255,0.4);background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);
-  border-radius:20px;padding:5px 9px;cursor:pointer;transition:all 0.2s}
-.hpill:hover{background:rgba(255,255,255,0.1);color:rgba(255,255,255,0.7)}
-.sdot{width:6px;height:6px;border-radius:50%;background:var(--muted);transition:background 0.3s}
-.sdot.ok{background:#5ec97a;box-shadow:0 0 5px #5ec97a88}
-.sdot.busy{background:var(--gold2);animation:blink 0.8s infinite}
-.sdot.err{background:#e05a4a}
-@keyframes blink{0%,100%{opacity:1}50%{opacity:0.3}}
-.tabs{display:flex;overflow-x:auto;scrollbar-width:none;border-top:1px solid rgba(255,255,255,0.07);padding:0 4px}
-.tabs::-webkit-scrollbar{display:none}
-.tab{padding:11px 14px;font-size:9px;letter-spacing:1.5px;text-transform:uppercase;
-  color:rgba(255,255,255,0.3);cursor:pointer;white-space:nowrap;border-bottom:2px solid transparent;transition:all 0.2s}
-.tab.active{color:var(--gold2);border-bottom-color:var(--gold2)}
-.tab:hover:not(.active){color:rgba(255,255,255,0.6)}
+      /* HEADER */
+      header {
+        background: var(--ink);
+        color: var(--paper);
+        padding: 16px 20px 0;
+        position: sticky;
+        top: 0;
+        z-index: 50;
+      }
+      .htop {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 13px;
+        gap: 10px;
+      }
+      .logo {
+        font-family: "Instrument Serif", serif;
+        font-style: italic;
+        font-size: clamp(16px, 4vw, 22px);
+        color: var(--gold2);
+      }
+      .header-right {
+        display: flex;
+        align-items: center;
+        gap: 7px;
+      }
+      .hpill {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        font-size: 9px;
+        letter-spacing: 1px;
+        text-transform: uppercase;
+        color: rgba(255, 255, 255, 0.4);
+        background: rgba(255, 255, 255, 0.06);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 20px;
+        padding: 5px 9px;
+        cursor: pointer;
+        transition: all 0.2s;
+      }
+      .hpill:hover {
+        background: rgba(255, 255, 255, 0.1);
+        color: rgba(255, 255, 255, 0.7);
+      }
+      .sdot {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: var(--muted);
+        transition: background 0.3s;
+      }
+      .sdot.ok {
+        background: #5ec97a;
+        box-shadow: 0 0 5px #5ec97a88;
+      }
+      .sdot.busy {
+        background: var(--gold2);
+        animation: blink 0.8s infinite;
+      }
+      .sdot.err {
+        background: #e05a4a;
+      }
+      @keyframes blink {
+        0%,
+        100% {
+          opacity: 1;
+        }
+        50% {
+          opacity: 0.3;
+        }
+      }
+      .tabs {
+        display: flex;
+        overflow-x: auto;
+        scrollbar-width: none;
+        border-top: 1px solid rgba(255, 255, 255, 0.07);
+        padding: 0 4px;
+      }
+      .tabs::-webkit-scrollbar {
+        display: none;
+      }
+      .tab {
+        padding: 11px 14px;
+        font-size: 9px;
+        letter-spacing: 1.5px;
+        text-transform: uppercase;
+        color: rgba(255, 255, 255, 0.3);
+        cursor: pointer;
+        white-space: nowrap;
+        border-bottom: 2px solid transparent;
+        transition: all 0.2s;
+      }
+      .tab.active {
+        color: var(--gold2);
+        border-bottom-color: var(--gold2);
+      }
+      .tab:hover:not(.active) {
+        color: rgba(255, 255, 255, 0.6);
+      }
 
-/* MAIN */
-main{padding:20px;max-width:860px;margin:0 auto;position:relative;z-index:1}
-.sec{font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);
-  margin-bottom:13px;display:flex;align-items:center;gap:8px}
-.sec::after{content:'';flex:1;height:1px;background:var(--border)}
+      /* MAIN */
+      main {
+        padding: 24px 28px;
+        max-width: 1100px;
+        margin: 0 auto;
+        position: relative;
+        z-index: 1;
+      }
+      .sec {
+        font-size: 9px;
+        letter-spacing: 2px;
+        text-transform: uppercase;
+        color: var(--muted);
+        margin-bottom: 13px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .sec::after {
+        content: "";
+        flex: 1;
+        height: 1px;
+        background: var(--border);
+      }
 
-/* LOG */
-.log-header{display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:20px;gap:10px}
-.date-nav{display:flex;align-items:center;gap:8px}
-.nav-arr{background:var(--paper2);border:1px solid var(--border);color:var(--ink);
-  font-size:15px;padding:6px 10px;border-radius:7px;cursor:pointer;transition:all 0.15s;line-height:1}
-.nav-arr:hover:not(:disabled){border-color:var(--accent);background:var(--paper3)}
-.nav-arr:disabled{opacity:0.3;cursor:default}
-.log-date-info .wd{font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:3px}
-.log-date-info .dm{font-family:'Instrument Serif',serif;font-size:clamp(24px,6vw,42px);line-height:1}
-.backdate-tag{display:inline-flex;align-items:center;gap:4px;font-size:9px;letter-spacing:1px;
-  text-transform:uppercase;color:var(--red);background:#fdf0ef;border:1px solid #f5cdc9;
-  border-radius:20px;padding:2px 8px;margin-top:5px}
-.ring-wrap{display:flex;flex-direction:column;align-items:center;gap:3px;flex-shrink:0}
-.rlabel{font-size:9px;letter-spacing:1px;text-transform:uppercase;color:var(--muted)}
-.ring-svg{transform:rotate(-90deg)}
-.ring-bg{fill:none;stroke:var(--paper3);stroke-width:5}
-.ring-fg{fill:none;stroke:var(--accent);stroke-width:5;stroke-linecap:round;
-  transition:stroke-dashoffset 0.5s cubic-bezier(.4,0,.2,1)}
-.ring-num{fill:var(--accent);font-family:'Instrument Serif',serif;font-size:14px;dominant-baseline:middle;text-anchor:middle}
+      /* LOG HEADER */
+      .log-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 28px;
+        gap: 16px;
+      }
+      .date-nav {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+      .nav-arr {
+        background: rgba(255, 255, 255, 0.7);
+        border: 1px solid var(--border);
+        color: var(--ink);
+        font-size: 16px;
+        padding: 8px 13px;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.15s;
+        line-height: 1;
+        backdrop-filter: blur(4px);
+      }
+      .nav-arr:hover:not(:disabled) {
+        border-color: var(--accent);
+        background: rgba(255, 255, 255, 0.9);
+      }
+      .nav-arr:disabled {
+        opacity: 0.3;
+        cursor: default;
+      }
+      .log-date-info .wd {
+        font-size: 10px;
+        letter-spacing: 2.5px;
+        text-transform: uppercase;
+        color: var(--muted);
+        margin-bottom: 4px;
+      }
+      .log-date-info .dm {
+        font-family: "Instrument Serif", serif;
+        font-size: clamp(28px, 5vw, 52px);
+        line-height: 1;
+        letter-spacing: -1px;
+      }
+      .backdate-tag {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        font-size: 9px;
+        letter-spacing: 1px;
+        text-transform: uppercase;
+        color: var(--red);
+        background: #fdf0ef;
+        border: 1px solid #f5cdc9;
+        border-radius: 20px;
+        padding: 2px 9px;
+        margin-top: 6px;
+      }
 
-/* HABIT CARDS */
-.habits-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(255px,1fr));gap:9px}
-.hcard{background:#fff;border:1px solid var(--border);border-radius:var(--r);
-  padding:13px 15px;display:flex;align-items:center;gap:11px;cursor:pointer;
-  transition:all 0.18s;position:relative;overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,0.05)}
-.hcard::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--border);transition:background 0.2s}
-.hcard:hover{border-color:var(--accent);transform:translateY(-1px);box-shadow:0 4px 12px rgba(0,0,0,0.09)}
-.hcard:active{transform:translateY(0)}
-.hcard.done{border-color:var(--green);background:#f5fbf6}
-.hcard.done::before{background:var(--green)}
-.hcard.done .hname{color:var(--muted);text-decoration:line-through}
-.hcard.done:hover{border-color:var(--green)}
-.hemoji{font-size:22px;width:32px;text-align:center;flex-shrink:0}
-.hinfo{flex:1;min-width:0}
-.hname{font-size:12px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.hstreak{font-size:9px;color:var(--muted);margin-top:3px}
-.hstreak b{color:var(--accent);font-weight:500}
-.chk{width:26px;height:26px;border-radius:50%;border:2px solid var(--border);
-  background:transparent;display:flex;align-items:center;justify-content:center;
-  flex-shrink:0;font-size:12px;color:transparent;transition:all 0.18s;pointer-events:none}
-.hcard.done .chk{background:var(--green);border-color:var(--green);color:#fff}
+      /* RING — bigger on desktop */
+      .ring-wrap {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 4px;
+        flex-shrink: 0;
+      }
+      .rlabel {
+        font-size: 9px;
+        letter-spacing: 1px;
+        text-transform: uppercase;
+        color: var(--muted);
+      }
+      .ring-svg {
+        transform: rotate(-90deg);
+      }
+      .ring-bg {
+        fill: none;
+        stroke: var(--paper3);
+        stroke-width: 6;
+      }
+      .ring-fg {
+        fill: none;
+        stroke: var(--accent);
+        stroke-width: 6;
+        stroke-linecap: round;
+        transition: stroke-dashoffset 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+      .ring-num {
+        fill: var(--accent);
+        font-family: "Instrument Serif", serif;
+        font-size: 16px;
+        dominant-baseline: middle;
+        text-anchor: middle;
+      }
 
-/* WEEK */
-.week7{display:grid;grid-template-columns:repeat(7,1fr);gap:5px;margin-bottom:7px}
-.wlabel{font-size:9px;color:var(--muted);text-align:center;text-transform:uppercase}
-.wcell{aspect-ratio:1;border-radius:7px;background:var(--paper2);border:1px solid var(--border);
-  display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:500;
-  color:var(--muted);cursor:pointer;transition:all 0.15s}
-.wcell:hover:not(.future){border-color:var(--accent)}
-.wcell.future{opacity:0.3;cursor:default}
-.wcell.all{background:var(--green);border-color:var(--green);color:#fff}
-.wcell.good{background:#7bba8d;border-color:#7bba8d;color:#fff}
-.wcell.half{background:var(--gold);border-color:var(--gold);color:#fff}
-.wcell.low{background:var(--gold2);border-color:var(--gold2);color:#fff}
-.wcell.none{background:var(--red);border-color:var(--red);color:#fff}
-.wcell.today{outline:2px solid var(--accent);outline-offset:2px}
-.wcell.viewing{outline:2px solid var(--red);outline-offset:2px}
-.phr{background:#fff;border:1px solid var(--border);border-radius:var(--r);
-  padding:11px 13px;margin-bottom:7px;box-shadow:0 1px 3px rgba(0,0,0,0.04)}
-.phr-top{display:flex;align-items:center;gap:9px;margin-bottom:7px}
-.phr-dots{display:flex;gap:4px}
-.phrdot{width:16px;height:16px;border-radius:4px;cursor:pointer;transition:opacity 0.15s}
-.phrdot:hover{opacity:0.75}
+      /* ── MOTIVATIONAL HABIT CARDS ── */
+      .habits-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 14px;
+      }
+      @media (min-width: 900px) {
+        .habits-grid {
+          grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+          gap: 16px;
+        }
+      }
+      .hcard {
+        background: rgba(255, 255, 255, 0.82);
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        padding: 20px 22px 18px;
+        display: flex;
+        align-items: flex-start;
+        gap: 16px;
+        cursor: pointer;
+        transition: all 0.22s cubic-bezier(0.2, 0, 0.2, 1);
+        position: relative;
+        overflow: hidden;
+        box-shadow:
+          0 2px 8px rgba(0, 0, 0, 0.06),
+          0 1px 2px rgba(0, 0, 0, 0.04);
+        backdrop-filter: blur(6px);
+      }
+      /* Decorative corner accent */
+      .hcard::after {
+        content: "";
+        position: absolute;
+        top: -20px;
+        right: -20px;
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        background: radial-gradient(
+          circle,
+          rgba(196, 146, 42, 0.08) 0%,
+          transparent 70%
+        );
+        transition: all 0.3s;
+      }
+      .hcard::before {
+        content: "";
+        position: absolute;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        width: 4px;
+        background: var(--border);
+        border-radius: 4px 0 0 4px;
+        transition: background 0.22s;
+      }
+      .hcard:hover {
+        border-color: var(--accent);
+        transform: translateY(-3px);
+        box-shadow:
+          0 8px 28px rgba(196, 146, 42, 0.15),
+          0 2px 8px rgba(0, 0, 0, 0.07);
+        background: rgba(255, 255, 255, 0.95);
+      }
+      .hcard:hover::after {
+        background: radial-gradient(
+          circle,
+          rgba(196, 146, 42, 0.14) 0%,
+          transparent 70%
+        );
+        transform: scale(1.3);
+      }
+      .hcard:active {
+        transform: translateY(-1px);
+      }
 
-/* MISSED */
-.missed-card{background:#fff;border:1px solid var(--border);border-radius:var(--r);
-  padding:13px 15px;margin-bottom:9px;box-shadow:0 1px 3px rgba(0,0,0,0.04)}
-.missed-top{display:flex;align-items:center;gap:11px;margin-bottom:8px}
-.mdots{display:flex;gap:3px;flex-wrap:wrap}
-.mdot{width:10px;height:10px;border-radius:3px;cursor:pointer;transition:opacity 0.15s}
-.mdot:hover{opacity:0.7}
+      .hcard.done {
+        border-color: #a8d4b5;
+        background: linear-gradient(
+          135deg,
+          rgba(245, 251, 246, 0.95) 0%,
+          rgba(235, 248, 239, 0.9) 100%
+        );
+      }
+      .hcard.done::before {
+        background: var(--green);
+      }
+      .hcard.done::after {
+        background: radial-gradient(
+          circle,
+          rgba(46, 102, 64, 0.1) 0%,
+          transparent 70%
+        );
+      }
+      .hcard.done:hover {
+        border-color: var(--green);
+        box-shadow:
+          0 8px 28px rgba(46, 102, 64, 0.14),
+          0 2px 8px rgba(0, 0, 0, 0.06);
+      }
+      .hcard.done .hname {
+        color: #6b9e7a;
+      }
 
-/* HEATMAP */
-.heatmap-scroll{overflow-x:auto;padding-bottom:5px}
-.heatmap{display:grid;grid-template-rows:repeat(7,13px);grid-auto-flow:column;gap:3px;min-width:max-content}
-.hcell{width:13px;height:13px;border-radius:3px;cursor:pointer;transition:opacity 0.15s}
-.hcell:hover{opacity:0.7}
-.h0{background:var(--paper3)}.h1{background:#b7dfc4}.h2{background:#7bba8d}
-.h3{background:#4d9e63}.h4{background:var(--green)}
-.heat-legend{display:flex;align-items:center;gap:5px;margin-top:9px;font-size:9px;color:var(--muted)}
-.stats-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(138px,1fr));gap:9px;margin-top:18px}
-.stat-card{background:#fff;border:1px solid var(--border);border-radius:var(--r);
-  padding:15px;box-shadow:0 1px 3px rgba(0,0,0,0.04)}
-.sv{font-family:'Instrument Serif',serif;font-size:36px;color:var(--accent);line-height:1}
-.sl{font-size:9px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-top:4px}
+      /* Emoji — larger */
+      .hemoji {
+        font-size: 34px;
+        width: 50px;
+        height: 50px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(196, 146, 42, 0.08);
+        border-radius: 12px;
+        flex-shrink: 0;
+        transition: transform 0.2s;
+      }
+      .hcard:hover .hemoji {
+        transform: scale(1.08) rotate(-4deg);
+      }
+      .hcard.done .hemoji {
+        background: rgba(46, 102, 64, 0.1);
+      }
 
-/* MANAGE */
-.mrow{background:#fff;border:1px solid var(--border);border-radius:var(--r);
-  padding:11px 13px;display:flex;align-items:center;gap:9px;margin-bottom:7px;
-  box-shadow:0 1px 3px rgba(0,0,0,0.04);animation:fadeUp 0.2s ease}
-.moji{font-size:19px;cursor:pointer;width:28px;text-align:center}
-.mrow input[type=text]{flex:1;background:transparent;border:none;color:var(--ink);
-  font-family:'DM Mono',monospace;font-size:12px;outline:none}
-.toggle-lbl{display:flex;align-items:center;gap:5px;font-size:9px;letter-spacing:0.5px;color:var(--muted);cursor:pointer}
-.del-btn{background:none;border:none;color:var(--muted);cursor:pointer;font-size:14px;padding:3px;transition:color 0.15s}
-.del-btn:hover{color:var(--red)}
-.add-row{display:flex;gap:7px;margin-top:13px;flex-wrap:wrap;align-items:center}
-.add-row input{flex:1;min-width:150px;background:#fff;border:1px solid var(--border);color:var(--ink);
-  font-family:'DM Mono',monospace;font-size:12px;padding:10px 12px;border-radius:8px;outline:none;transition:border-color 0.2s}
-.add-row input:focus{border-color:var(--accent)}
-.btn{background:var(--paper2);border:1px solid var(--border);color:var(--ink);
-  font-family:'DM Mono',monospace;font-size:11px;padding:9px 13px;border-radius:8px;cursor:pointer;transition:all 0.18s}
-.btn:hover{border-color:var(--accent);background:var(--paper3)}
-.btn-dark{background:var(--ink);color:var(--paper);border-color:var(--ink)}
-.btn-dark:hover{background:#2a2520;border-color:#2a2520}
-.profile-card{background:#fff;border:1px solid var(--border);border-radius:var(--r);
-  padding:18px;margin-bottom:16px;box-shadow:0 1px 3px rgba(0,0,0,0.04)}
-.profile-card h4{font-size:9px;letter-spacing:1.2px;text-transform:uppercase;color:var(--muted);margin-bottom:12px}
-.prow{display:flex;gap:9px;align-items:center;flex-wrap:wrap}
-.prow input{flex:1;min-width:140px;background:var(--paper2);border:1px solid var(--border);color:var(--ink);
-  font-family:'DM Mono',monospace;font-size:12px;padding:9px 12px;border-radius:8px;outline:none;transition:border-color 0.2s}
-.prow input:focus{border-color:var(--accent)}
-.pin-change-wrap{margin-top:12px}
-.pin-change-row{display:flex;gap:9px;margin-top:6px;flex-wrap:wrap;align-items:center}
-.pin-change-row input{width:130px;background:var(--paper2);border:1px solid var(--border);color:var(--ink);
-  font-family:'DM Mono',monospace;font-size:12px;padding:9px 12px;border-radius:8px;outline:none;transition:border-color 0.2s}
-.pin-change-row input:focus{border-color:var(--accent)}
+      .hinfo {
+        flex: 1;
+        min-width: 0;
+        padding-top: 2px;
+      }
+      .hname {
+        font-size: 14px;
+        font-weight: 500;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        margin-bottom: 6px;
+        letter-spacing: -0.2px;
+      }
+      .hcard.done .hname {
+        text-decoration: line-through;
+        opacity: 0.7;
+      }
 
-/* OVERLAY */
-.overlay{position:fixed;inset:0;background:rgba(20,18,14,0.6);backdrop-filter:blur(4px);
-  z-index:200;display:none;align-items:center;justify-content:center;padding:20px}
-.overlay.open{display:flex}
-.modal{background:var(--paper);border:1px solid var(--border);border-radius:16px;
-  padding:22px;width:100%;max-width:380px;animation:fadeUp 0.2s ease;
-  box-shadow:0 8px 32px rgba(0,0,0,0.14);max-height:88vh;overflow-y:auto}
-.modal h3{font-family:'Instrument Serif',serif;font-size:20px;font-style:italic;margin-bottom:13px;color:var(--accent)}
-.egrid{display:grid;grid-template-columns:repeat(8,1fr);gap:5px;margin-bottom:13px}
-.eopt{font-size:19px;padding:6px;border-radius:7px;cursor:pointer;text-align:center;
-  transition:background 0.12s;border:1px solid transparent}
-.eopt:hover{background:var(--paper3);border-color:var(--border)}
+      /* Streak bar */
+      .hstreak-row {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 8px;
+      }
+      .hstreak {
+        font-size: 10px;
+        color: var(--muted);
+      }
+      .hstreak b {
+        color: var(--accent);
+        font-weight: 500;
+      }
+      .hcard.done .hstreak b {
+        color: var(--green);
+      }
 
-/* TOAST */
-.toast{position:fixed;bottom:26px;left:50%;transform:translateX(-50%) translateY(8px);
-  background:var(--ink);color:var(--paper);padding:8px 18px;border-radius:30px;
-  font-size:11px;z-index:500;opacity:0;transition:all 0.25s;pointer-events:none;white-space:nowrap}
-.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+      /* Mini week dots on card */
+      .hcard-dots {
+        display: flex;
+        gap: 3px;
+      }
+      .hcard-dot {
+        width: 7px;
+        height: 7px;
+        border-radius: 2px;
+        background: var(--paper3);
+      }
+      .hcard-dot.on {
+        background: var(--green);
+      }
+      .hcard-dot.today-on {
+        background: var(--accent);
+      }
 
-@media(max-width:480px){
-  main{padding:14px}
-  .habits-grid{grid-template-columns:1fr}
-  .stats-grid{grid-template-columns:repeat(2,1fr)}
-  header{padding:14px 16px 0}
-}
-</style>
-</head>
-<body>
+      /* Check button — larger */
+      .chk {
+        width: 34px;
+        height: 34px;
+        border-radius: 50%;
+        border: 2px solid var(--border);
+        background: transparent;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        font-size: 15px;
+        color: transparent;
+        transition: all 0.2s;
+        pointer-events: none;
+        margin-top: 2px;
+      }
+      .hcard:hover .chk {
+        border-color: var(--accent);
+      }
+      .hcard.done .chk {
+        background: var(--green);
+        border-color: var(--green);
+        color: #fff;
+        box-shadow: 0 2px 8px rgba(46, 102, 64, 0.3);
+      }
 
-<!-- SCREEN: USER SELECT -->
-<div id="screenSelect" class="screen hidden">
-  <div class="card">
-    <h2>Who's tracking?</h2>
-    <p>Select your profile to continue.</p>
-    <div class="ulist" id="userList"></div>
-    <div class="or-sep">— or —</div>
-    <button class="btn-outline" onclick="showSetup()">+ Add New Profile</button>
-  </div>
-</div>
+      /* WEEK */
+      .week7 {
+        display: grid;
+        grid-template-columns: repeat(7, 1fr);
+        gap: 5px;
+        margin-bottom: 7px;
+      }
+      .wlabel {
+        font-size: 9px;
+        color: var(--muted);
+        text-align: center;
+        text-transform: uppercase;
+      }
+      .wcell {
+        aspect-ratio: 1;
+        border-radius: 7px;
+        background: var(--paper2);
+        border: 1px solid var(--border);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 10px;
+        font-weight: 500;
+        color: var(--muted);
+        cursor: pointer;
+        transition: all 0.15s;
+      }
+      .wcell:hover:not(.future) {
+        border-color: var(--accent);
+      }
+      .wcell.future {
+        opacity: 0.3;
+        cursor: default;
+      }
+      .wcell.all {
+        background: var(--green);
+        border-color: var(--green);
+        color: #fff;
+      }
+      .wcell.good {
+        background: #7bba8d;
+        border-color: #7bba8d;
+        color: #fff;
+      }
+      .wcell.half {
+        background: var(--gold);
+        border-color: var(--gold);
+        color: #fff;
+      }
+      .wcell.low {
+        background: var(--gold2);
+        border-color: var(--gold2);
+        color: #fff;
+      }
+      .wcell.none {
+        background: var(--red);
+        border-color: var(--red);
+        color: #fff;
+      }
+      .wcell.today {
+        outline: 2px solid var(--accent);
+        outline-offset: 2px;
+      }
+      .wcell.viewing {
+        outline: 2px solid var(--red);
+        outline-offset: 2px;
+      }
+      .phr {
+        background: #fff;
+        border: 1px solid var(--border);
+        border-radius: var(--r);
+        padding: 11px 13px;
+        margin-bottom: 7px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+      }
+      .phr-top {
+        display: flex;
+        align-items: center;
+        gap: 9px;
+        margin-bottom: 7px;
+      }
+      .phr-dots {
+        display: flex;
+        gap: 4px;
+      }
+      .phrdot {
+        width: 16px;
+        height: 16px;
+        border-radius: 4px;
+        cursor: pointer;
+        transition: opacity 0.15s;
+      }
+      .phrdot:hover {
+        opacity: 0.75;
+      }
 
-<!-- SCREEN: SETUP -->
-<div id="screenSetup" class="screen hidden">
-  <div class="card">
-    <h2>New Profile</h2>
-    <p>Connect a private GitHub Gist as your personal data store. Takes ~8 min once.</p>
-    <div class="steps">
-      <div class="step"><div class="snum">1</div><div>Go to <a href="https://github.com/settings/tokens/new" target="_blank">github.com/settings/tokens/new</a> → Note: <code>habits</code> → Expiration: <code>No expiration</code> → check only ☑ <code>gist</code> → Generate &amp; copy token.</div></div>
-      <div class="step"><div class="snum">2</div><div>Go to <a href="https://gist.github.com" target="_blank">gist.github.com</a> → Description: <code>habits-data</code> → Filename: <code>habits.json</code> → Content: <code>{}</code> → Create secret gist → copy the ID from the URL (long string after your username).</div></div>
-      <div class="step"><div class="snum">3</div><div>Fill in below and click Save. The URL will update with your config encoded in the hash (<code>#abc123…</code>). <b>Bookmark that URL immediately</b> — it works on any device, any browser, after any cache clear. Share it with no one.</div></div>
-    </div>
-    <div class="field"><label>Your Name</label><input id="setupName" placeholder="e.g. Sashin or Priya"></div>
-    <div class="field"><label>GitHub Token</label><input id="setupToken" type="password" placeholder="ghp_xxxxxxxxxxxx"></div>
-    <div class="field"><label>Gist ID</label><input id="setupGist" placeholder="a1b2c3d4e5f6..."></div>
-    <div class="field">
-      <label>Profile Colour</label>
-      <div class="color-opts" id="setupColors"></div>
-    </div>
-    <div class="field"><label>4-Digit PIN (optional — leave blank to skip)</label>
-      <input id="setupPin" type="password" maxlength="4" placeholder="leave blank = no lock"></div>
-    <button class="btn-primary" onclick="saveSetup()">Save Profile →</button>
-    <div class="screen-err" id="setupErr"></div>
-    <div style="margin-top:12px;text-align:center">
-      <span style="font-size:10px;color:var(--muted);cursor:pointer" onclick="showSelect()">← Back to profiles</span>
-    </div>
-  </div>
-</div>
+      /* MISSED */
+      .missed-card {
+        background: #fff;
+        border: 1px solid var(--border);
+        border-radius: var(--r);
+        padding: 13px 15px;
+        margin-bottom: 9px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+      }
+      .missed-top {
+        display: flex;
+        align-items: center;
+        gap: 11px;
+        margin-bottom: 8px;
+      }
+      .mdots {
+        display: flex;
+        gap: 3px;
+        flex-wrap: wrap;
+      }
+      .mdot {
+        width: 10px;
+        height: 10px;
+        border-radius: 3px;
+        cursor: pointer;
+        transition: opacity 0.15s;
+      }
+      .mdot:hover {
+        opacity: 0.7;
+      }
 
-<!-- SCREEN: PIN -->
-<div id="screenPin" class="screen hidden">
-  <div class="pin-wrap">
-    <div class="pin-greeting" id="pinGreeting">Welcome back,</div>
-    <div class="pin-title" id="pinTitle">Your Habits</div>
-    <div class="pin-sub">enter PIN to continue</div>
-    <div class="pin-dots" id="pinDots">
-      <div class="pdot"></div><div class="pdot"></div>
-      <div class="pdot"></div><div class="pdot"></div>
-    </div>
-    <div class="keypad">
-      <div class="key" onclick="pinKey('1')">1</div>
-      <div class="key" onclick="pinKey('2')">2</div>
-      <div class="key" onclick="pinKey('3')">3</div>
-      <div class="key" onclick="pinKey('4')">4</div>
-      <div class="key" onclick="pinKey('5')">5</div>
-      <div class="key" onclick="pinKey('6')">6</div>
-      <div class="key" onclick="pinKey('7')">7</div>
-      <div class="key" onclick="pinKey('8')">8</div>
-      <div class="key" onclick="pinKey('9')">9</div>
-      <div class="key empty"></div>
-      <div class="key" onclick="pinKey('0')">0</div>
-      <div class="key del" onclick="pinDel()">⌫</div>
-    </div>
-    <div class="pin-err" id="pinErr"></div>
-    <div class="pin-switch" onclick="showSelect()">← Switch user</div>
-  </div>
-</div>
+      /* HEATMAP */
+      .heatmap-scroll {
+        overflow-x: auto;
+        padding-bottom: 5px;
+      }
+      .heatmap {
+        display: grid;
+        grid-template-rows: repeat(7, 13px);
+        grid-auto-flow: column;
+        gap: 3px;
+        min-width: max-content;
+      }
+      .hcell {
+        width: 13px;
+        height: 13px;
+        border-radius: 3px;
+        cursor: pointer;
+        transition: opacity 0.15s;
+      }
+      .hcell:hover {
+        opacity: 0.7;
+      }
+      .h0 {
+        background: var(--paper3);
+      }
+      .h1 {
+        background: #b7dfc4;
+      }
+      .h2 {
+        background: #7bba8d;
+      }
+      .h3 {
+        background: #4d9e63;
+      }
+      .h4 {
+        background: var(--green);
+      }
+      .heat-legend {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        margin-top: 9px;
+        font-size: 9px;
+        color: var(--muted);
+      }
+      .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(138px, 1fr));
+        gap: 9px;
+        margin-top: 18px;
+      }
+      .stat-card {
+        background: #fff;
+        border: 1px solid var(--border);
+        border-radius: var(--r);
+        padding: 15px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+      }
+      .sv {
+        font-family: "Instrument Serif", serif;
+        font-size: 36px;
+        color: var(--accent);
+        line-height: 1;
+      }
+      .sl {
+        font-size: 9px;
+        letter-spacing: 1px;
+        text-transform: uppercase;
+        color: var(--muted);
+        margin-top: 4px;
+      }
 
-<!-- MAIN APP -->
-<div id="app" style="display:none">
-  <header>
-    <div class="htop">
-      <div class="logo" id="appLogo">Habits</div>
-      <div class="header-right">
-        <div class="hpill" onclick="manualSync()">
-          <div class="sdot" id="sdot"></div>
-          <span id="slabel">synced</span>
-        </div>
-        <div class="hpill" onclick="lockAndSwitch()">⇄ Switch</div>
+      /* MANAGE */
+      .mrow {
+        background: #fff;
+        border: 1px solid var(--border);
+        border-radius: var(--r);
+        padding: 11px 13px;
+        display: flex;
+        align-items: center;
+        gap: 9px;
+        margin-bottom: 7px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+        animation: fadeUp 0.2s ease;
+      }
+      .moji {
+        font-size: 19px;
+        cursor: pointer;
+        width: 28px;
+        text-align: center;
+      }
+      .mrow input[type="text"] {
+        flex: 1;
+        background: transparent;
+        border: none;
+        color: var(--ink);
+        font-family: "DM Mono", monospace;
+        font-size: 12px;
+        outline: none;
+      }
+      .toggle-lbl {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        font-size: 9px;
+        letter-spacing: 0.5px;
+        color: var(--muted);
+        cursor: pointer;
+      }
+      .del-btn {
+        background: none;
+        border: none;
+        color: var(--muted);
+        cursor: pointer;
+        font-size: 14px;
+        padding: 3px;
+        transition: color 0.15s;
+      }
+      .del-btn:hover {
+        color: var(--red);
+      }
+      .add-row {
+        display: flex;
+        gap: 7px;
+        margin-top: 13px;
+        flex-wrap: wrap;
+        align-items: center;
+      }
+      .add-row input {
+        flex: 1;
+        min-width: 150px;
+        background: #fff;
+        border: 1px solid var(--border);
+        color: var(--ink);
+        font-family: "DM Mono", monospace;
+        font-size: 12px;
+        padding: 10px 12px;
+        border-radius: 8px;
+        outline: none;
+        transition: border-color 0.2s;
+      }
+      .add-row input:focus {
+        border-color: var(--accent);
+      }
+      .btn {
+        background: var(--paper2);
+        border: 1px solid var(--border);
+        color: var(--ink);
+        font-family: "DM Mono", monospace;
+        font-size: 11px;
+        padding: 9px 13px;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.18s;
+      }
+      .btn:hover {
+        border-color: var(--accent);
+        background: var(--paper3);
+      }
+      .btn-dark {
+        background: var(--ink);
+        color: var(--paper);
+        border-color: var(--ink);
+      }
+      .btn-dark:hover {
+        background: #2a2520;
+        border-color: #2a2520;
+      }
+      .profile-card {
+        background: #fff;
+        border: 1px solid var(--border);
+        border-radius: var(--r);
+        padding: 18px;
+        margin-bottom: 16px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+      }
+      .profile-card h4 {
+        font-size: 9px;
+        letter-spacing: 1.2px;
+        text-transform: uppercase;
+        color: var(--muted);
+        margin-bottom: 12px;
+      }
+      .prow {
+        display: flex;
+        gap: 9px;
+        align-items: center;
+        flex-wrap: wrap;
+      }
+      .prow input {
+        flex: 1;
+        min-width: 140px;
+        background: var(--paper2);
+        border: 1px solid var(--border);
+        color: var(--ink);
+        font-family: "DM Mono", monospace;
+        font-size: 12px;
+        padding: 9px 12px;
+        border-radius: 8px;
+        outline: none;
+        transition: border-color 0.2s;
+      }
+      .prow input:focus {
+        border-color: var(--accent);
+      }
+      .pin-change-wrap {
+        margin-top: 12px;
+      }
+      .pin-change-row {
+        display: flex;
+        gap: 9px;
+        margin-top: 6px;
+        flex-wrap: wrap;
+        align-items: center;
+      }
+      .pin-change-row input {
+        width: 130px;
+        background: var(--paper2);
+        border: 1px solid var(--border);
+        color: var(--ink);
+        font-family: "DM Mono", monospace;
+        font-size: 12px;
+        padding: 9px 12px;
+        border-radius: 8px;
+        outline: none;
+        transition: border-color 0.2s;
+      }
+      .pin-change-row input:focus {
+        border-color: var(--accent);
+      }
+
+      /* OVERLAY */
+      .overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(20, 18, 14, 0.6);
+        backdrop-filter: blur(4px);
+        z-index: 200;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+      }
+      .overlay.open {
+        display: flex;
+      }
+      .modal {
+        background: var(--paper);
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        padding: 22px;
+        width: 100%;
+        max-width: 380px;
+        animation: fadeUp 0.2s ease;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.14);
+        max-height: 88vh;
+        overflow-y: auto;
+      }
+      .modal h3 {
+        font-family: "Instrument Serif", serif;
+        font-size: 20px;
+        font-style: italic;
+        margin-bottom: 13px;
+        color: var(--accent);
+      }
+      .egrid {
+        display: grid;
+        grid-template-columns: repeat(8, 1fr);
+        gap: 5px;
+        margin-bottom: 13px;
+      }
+      .eopt {
+        font-size: 19px;
+        padding: 6px;
+        border-radius: 7px;
+        cursor: pointer;
+        text-align: center;
+        transition: background 0.12s;
+        border: 1px solid transparent;
+      }
+      .eopt:hover {
+        background: var(--paper3);
+        border-color: var(--border);
+      }
+
+      /* TOAST */
+      .toast {
+        position: fixed;
+        bottom: 26px;
+        left: 50%;
+        transform: translateX(-50%) translateY(8px);
+        background: var(--ink);
+        color: var(--paper);
+        padding: 8px 18px;
+        border-radius: 30px;
+        font-size: 11px;
+        z-index: 500;
+        opacity: 0;
+        transition: all 0.25s;
+        pointer-events: none;
+        white-space: nowrap;
+      }
+      .toast.show {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+      }
+
+      @media (max-width: 480px) {
+        main {
+          padding: 14px 16px;
+        }
+        .habits-grid {
+          grid-template-columns: 1fr;
+          gap: 10px;
+        }
+        .stats-grid {
+          grid-template-columns: repeat(2, 1fr);
+        }
+        header {
+          padding: 14px 16px 0;
+        }
+        .hcard {
+          padding: 16px 16px 14px;
+        }
+        .hemoji {
+          font-size: 28px;
+          width: 42px;
+          height: 42px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- SCREEN: USER SELECT -->
+    <div id="screenSelect" class="screen hidden">
+      <div class="card">
+        <h2>Who's tracking?</h2>
+        <p>Select your profile to continue.</p>
+        <div class="ulist" id="userList"></div>
+        <div class="or-sep">— or —</div>
+        <button class="btn-outline" onclick="showSetup()">
+          + Add New Profile
+        </button>
       </div>
     </div>
-    <div class="tabs">
-      <div class="tab active" data-tab="log" onclick="showTab('log')">Log</div>
-      <div class="tab" data-tab="week" onclick="showTab('week')">Week</div>
-      <div class="tab" data-tab="missed" onclick="showTab('missed')">Missed</div>
-      <div class="tab" data-tab="heatmap" onclick="showTab('heatmap')">Heatmap</div>
-      <div class="tab" data-tab="manage" onclick="showTab('manage')">Manage</div>
-    </div>
-  </header>
 
-  <main>
-    <!-- LOG (today + backdated) -->
-    <div id="tab-log">
-      <div class="log-header">
-        <div class="date-nav">
-          <button class="nav-arr" onclick="changeLogDate(-1)">‹</button>
-          <div class="log-date-info">
-            <div class="wd" id="logWd"></div>
-            <div class="dm" id="logDm"></div>
-            <div id="backdateTag" style="display:none" class="backdate-tag">↩ editing past day</div>
+    <!-- SCREEN: SETUP -->
+    <div id="screenSetup" class="screen hidden">
+      <div class="card">
+        <h2>New Profile</h2>
+        <p>
+          Connect a private GitHub Gist as your personal data store. Takes ~8
+          min once.
+        </p>
+        <div class="steps">
+          <div class="step">
+            <div class="snum">1</div>
+            <div>
+              Go to
+              <a href="https://github.com/settings/tokens/new" target="_blank"
+                >github.com/settings/tokens/new</a
+              >
+              → Note: <code>habits</code> → Expiration:
+              <code>No expiration</code> → check only ☑ <code>gist</code> →
+              Generate &amp; copy token.
+            </div>
           </div>
-          <button class="nav-arr" id="btnNext" onclick="changeLogDate(1)">›</button>
-        </div>
-        <div class="ring-wrap">
-          <svg width="64" height="64" class="ring-svg" viewBox="0 0 64 64">
-            <circle class="ring-bg" cx="32" cy="32" r="26"/>
-            <circle class="ring-fg" id="ringFg" cx="32" cy="32" r="26"
-              stroke-dasharray="163.4" stroke-dashoffset="163.4"/>
-            <text x="32" y="32" class="ring-num" transform="rotate(90,32,32)" id="ringTxt">0%</text>
-          </svg>
-          <div class="rlabel" id="ringFrac">0/0</div>
-        </div>
-      </div>
-      <div class="habits-grid" id="habitCards"></div>
-    </div>
-
-    <!-- WEEK -->
-    <div id="tab-week" style="display:none">
-      <div class="sec">This Week</div>
-      <div class="week7" id="weekLabels"></div>
-      <div class="week7" id="weekCells"></div>
-      <div style="margin-top:5px;font-size:10px;color:var(--muted);margin-bottom:18px">
-        ↑ Tap any day to go log or edit it
-      </div>
-      <div class="sec">Per Habit</div>
-      <div id="weekPerHabit"></div>
-    </div>
-
-    <!-- MISSED -->
-    <div id="tab-missed" style="display:none">
-      <div class="sec">Missed · Last 30 Days</div>
-      <div style="font-size:10px;color:var(--muted);margin-bottom:14px">Tap any dot to jump to that day and backfill it.</div>
-      <div id="missedList"></div>
-    </div>
-
-    <!-- HEATMAP -->
-    <div id="tab-heatmap" style="display:none">
-      <div class="sec">90-Day Heatmap</div>
-      <div style="font-size:10px;color:var(--muted);margin-bottom:10px">Tap any cell to jump to that day.</div>
-      <div class="heatmap-scroll"><div class="heatmap" id="heatmap"></div></div>
-      <div class="heat-legend">
-        <span>Less</span>
-        <div class="hcell h0" style="cursor:default"></div>
-        <div class="hcell h1" style="cursor:default"></div>
-        <div class="hcell h2" style="cursor:default"></div>
-        <div class="hcell h3" style="cursor:default"></div>
-        <div class="hcell h4" style="cursor:default"></div>
-        <span>More</span>
-      </div>
-      <div class="stats-grid" id="statsGrid"></div>
-    </div>
-
-    <!-- MANAGE -->
-    <div id="tab-manage" style="display:none">
-      <div class="sec">Profile</div>
-      <div class="profile-card">
-        <h4>Your Details</h4>
-        <div class="prow">
-          <input id="profileName" placeholder="Your name" onkeydown="if(event.key==='Enter')updateProfile()">
-          <button class="btn btn-dark" onclick="updateProfile()">Save</button>
-        </div>
-        <div style="margin-top:10px">
-          <div style="font-size:9px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:6px">Profile Colour</div>
-          <div class="color-opts" id="profileColors"></div>
-        </div>
-        <div class="pin-change-wrap">
-          <div style="font-size:9px;letter-spacing:1px;text-transform:uppercase;color:var(--muted)">PIN Lock</div>
-          <div class="pin-change-row">
-            <input id="newPin" type="password" maxlength="4" placeholder="new 4-digit PIN">
-            <button class="btn btn-dark" onclick="changePin()">Set PIN</button>
-            <button class="btn" onclick="removePin()">Remove PIN</button>
+          <div class="step">
+            <div class="snum">2</div>
+            <div>
+              Go to
+              <a href="https://gist.github.com" target="_blank"
+                >gist.github.com</a
+              >
+              → Description: <code>habits-data</code> → Filename:
+              <code>habits.json</code> → Content: <code>{}</code> → Create
+              secret gist → copy the ID from the URL (long string after your
+              username).
+            </div>
+          </div>
+          <div class="step">
+            <div class="snum">3</div>
+            <div>
+              Fill in below and click Save. The URL will update with your config
+              encoded in the hash (<code>#abc123…</code>).
+              <b>Bookmark that URL immediately</b> — it works on any device, any
+              browser, after any cache clear. Share it with no one.
+            </div>
           </div>
         </div>
+        <div class="field">
+          <label>Your Name</label
+          ><input id="setupName" placeholder="e.g. Sashin or Priya" />
+        </div>
+        <div class="field">
+          <label>GitHub Token</label
+          ><input
+            id="setupToken"
+            type="password"
+            placeholder="ghp_xxxxxxxxxxxx"
+          />
+        </div>
+        <div class="field">
+          <label>Gist ID</label
+          ><input id="setupGist" placeholder="a1b2c3d4e5f6..." />
+        </div>
+        <div class="field">
+          <label>Profile Colour</label>
+          <div class="color-opts" id="setupColors"></div>
+        </div>
+        <div class="field">
+          <label>4-Digit PIN (optional — leave blank to skip)</label>
+          <input
+            id="setupPin"
+            type="password"
+            maxlength="4"
+            placeholder="leave blank = no lock"
+          />
+        </div>
+        <button class="btn-primary" onclick="saveSetup()">
+          Save Profile →
+        </button>
+        <div class="screen-err" id="setupErr"></div>
+        <div style="margin-top: 12px; text-align: center">
+          <span
+            style="font-size: 10px; color: var(--muted); cursor: pointer"
+            onclick="showSelect()"
+            >← Back to profiles</span
+          >
+        </div>
       </div>
-
-      <div class="sec">Habits</div>
-      <div id="manageList"></div>
-      <div class="add-row">
-        <input id="newName" placeholder="New habit name..." onkeydown="if(event.key==='Enter')addHabit()">
-        <button class="btn" id="emojiBtn" onclick="openEmoji(null)" style="font-size:16px;padding:9px 11px">🌟</button>
-        <button class="btn btn-dark" onclick="addHabit()">+ Add</button>
-      </div>
-
-      <div class="sec" style="margin-top:22px">Data & Access</div>
-      <div style="font-size:10px;color:var(--muted);margin-bottom:10px;line-height:1.6">
-        Your profile config is encoded in the URL hash. <b>Bookmark or copy the URL below</b> — opening it on any device gives instant access, even after cache clears.
-      </div>
-      <div style="display:flex;gap:8px;flex-wrap:wrap">
-        <button class="btn btn-dark" onclick="copyMyURL()">🔗 Copy My URL</button>
-        <button class="btn" onclick="exportJSON()">⬇ Export JSON</button>
-        <button class="btn" onclick="document.getElementById('importFile').click()">⬆ Import JSON</button>
-        <button class="btn" onclick="resetProfile()" style="color:var(--red)">✕ Remove Profile</button>
-      </div>
-      <input type="file" id="importFile" accept=".json" style="display:none" onchange="importJSON(event)">
     </div>
-  </main>
-</div>
 
-<!-- Emoji Picker -->
-<div class="overlay" id="emojiOverlay">
-  <div class="modal">
-    <h3>Pick Emoji</h3>
-    <div class="egrid" id="emojiGrid"></div>
-    <button class="btn" onclick="closeEmoji()">Cancel</button>
-  </div>
-</div>
+    <!-- SCREEN: PIN -->
+    <div id="screenPin" class="screen hidden">
+      <div class="pin-wrap">
+        <div class="pin-greeting" id="pinGreeting">Welcome back,</div>
+        <div class="pin-title" id="pinTitle">Your Habits</div>
+        <div class="pin-sub">enter PIN to continue</div>
+        <div class="pin-dots" id="pinDots">
+          <div class="pdot"></div>
+          <div class="pdot"></div>
+          <div class="pdot"></div>
+          <div class="pdot"></div>
+        </div>
+        <div class="keypad">
+          <div class="key" onclick="pinKey('1')">1</div>
+          <div class="key" onclick="pinKey('2')">2</div>
+          <div class="key" onclick="pinKey('3')">3</div>
+          <div class="key" onclick="pinKey('4')">4</div>
+          <div class="key" onclick="pinKey('5')">5</div>
+          <div class="key" onclick="pinKey('6')">6</div>
+          <div class="key" onclick="pinKey('7')">7</div>
+          <div class="key" onclick="pinKey('8')">8</div>
+          <div class="key" onclick="pinKey('9')">9</div>
+          <div class="key empty"></div>
+          <div class="key" onclick="pinKey('0')">0</div>
+          <div class="key del" onclick="pinDel()">⌫</div>
+        </div>
+        <div class="pin-err" id="pinErr"></div>
+        <div class="pin-switch" onclick="showSelect()">← Switch user</div>
+      </div>
+    </div>
 
-<div class="toast" id="toast"></div>
+    <!-- MAIN APP -->
+    <div id="app" style="display: none">
+      <header>
+        <div class="htop">
+          <div class="logo" id="appLogo">Habits</div>
+          <div class="header-right">
+            <div class="hpill" onclick="manualSync()">
+              <div class="sdot" id="sdot"></div>
+              <span id="slabel">synced</span>
+            </div>
+            <div class="hpill" onclick="lockAndSwitch()">⇄ Switch</div>
+          </div>
+        </div>
+        <div class="tabs">
+          <div class="tab active" data-tab="log" onclick="showTab('log')">
+            Log
+          </div>
+          <div class="tab" data-tab="week" onclick="showTab('week')">Week</div>
+          <div class="tab" data-tab="missed" onclick="showTab('missed')">
+            Missed
+          </div>
+          <div class="tab" data-tab="heatmap" onclick="showTab('heatmap')">
+            Heatmap
+          </div>
+          <div class="tab" data-tab="manage" onclick="showTab('manage')">
+            Manage
+          </div>
+        </div>
+      </header>
 
-<script>
-// ═══════════════════════════════════════════════════
-//  CONSTANTS
-// ═══════════════════════════════════════════════════
-const GIST_FILE    = 'habits.json';
-const PROFILE_KEY  = 'hbt_profiles_v3'; // localStorage cache only — hash is source of truth
-const COLORS       = ['#c4922a','#2e6640','#274870','#8c3228','#5b4c8a','#2a7070','#7a4c2a','#4a4a4a'];
-const EMOJIS       = ['🌅','🎸','💪','💻','🤖','📓','🌿','🪥','🧘','🏃','🥊','🎹',
-  '📚','🎯','💧','🛌','🧠','✍️','🎨','🎵','🌱','🔥','⚡','🌟','🏋️','📖',
-  '🥗','☕','🎤','🎭','🌍','🍎','🧴','🪴','🎻','🥋'];
+      <main>
+        <!-- LOG (today + backdated) -->
+        <div id="tab-log">
+          <div class="log-header">
+            <div class="date-nav">
+              <button class="nav-arr" onclick="changeLogDate(-1)">‹</button>
+              <div class="log-date-info">
+                <div class="wd" id="logWd"></div>
+                <div class="dm" id="logDm"></div>
+                <div
+                  id="backdateTag"
+                  style="display: none"
+                  class="backdate-tag"
+                >
+                  ↩ editing past day
+                </div>
+              </div>
+              <button class="nav-arr" id="btnNext" onclick="changeLogDate(1)">
+                ›
+              </button>
+            </div>
+            <div class="ring-wrap">
+              <svg width="80" height="80" class="ring-svg" viewBox="0 0 80 80">
+                <circle class="ring-bg" cx="40" cy="40" r="32" />
+                <circle
+                  class="ring-fg"
+                  id="ringFg"
+                  cx="40"
+                  cy="40"
+                  r="32"
+                  stroke-dasharray="201.1"
+                  stroke-dashoffset="201.1"
+                />
+                <text
+                  x="40"
+                  y="40"
+                  class="ring-num"
+                  transform="rotate(90,40,40)"
+                  id="ringTxt"
+                >
+                  0%
+                </text>
+              </svg>
+              <div class="rlabel" id="ringFrac">0/0</div>
+            </div>
+          </div>
+          <div class="habits-grid" id="habitCards"></div>
+        </div>
 
-const DEFAULT_HABITS = () => [
-  {id:'wake',   name:'Wake Up Early',  emoji:'🌅',active:true},
-  {id:'guitar', name:'Guitar',         emoji:'🎸',active:true},
-  {id:'gym',    name:'Gym',            emoji:'💪',active:true},
-  {id:'lc',     name:'LeetCode',       emoji:'💻',active:true},
-  {id:'ai',     name:'AI Practice',    emoji:'🤖',active:true},
-  {id:'journal',name:'Journal',        emoji:'📓',active:true},
-  {id:'rose',   name:'Rosemary Spray', emoji:'🌿',active:true},
-  {id:'brush',  name:'Brush Twice',    emoji:'🪥',active:true},
-];
+        <!-- WEEK -->
+        <div id="tab-week" style="display: none">
+          <div class="sec">This Week</div>
+          <div class="week7" id="weekLabels"></div>
+          <div class="week7" id="weekCells"></div>
+          <div
+            style="
+              margin-top: 5px;
+              font-size: 10px;
+              color: var(--muted);
+              margin-bottom: 18px;
+            "
+          >
+            ↑ Tap any day to go log or edit it
+          </div>
+          <div class="sec">Per Habit</div>
+          <div id="weekPerHabit"></div>
+        </div>
 
-// ═══════════════════════════════════════════════════
-//  STATE
-// ═══════════════════════════════════════════════════
-let profiles    = [];
-let activeProf  = null;
-let data        = {};
-let logDate     = '';
-let currentTab  = 'log';
-let saveTimer   = null;
-let emojiTarget = null;
-let setupColor  = COLORS[0];
+        <!-- MISSED -->
+        <div id="tab-missed" style="display: none">
+          <div class="sec">Missed · Last 30 Days</div>
+          <div
+            style="font-size: 10px; color: var(--muted); margin-bottom: 14px"
+          >
+            Tap any dot to jump to that day and backfill it.
+          </div>
+          <div id="missedList"></div>
+        </div>
 
-// ═══════════════════════════════════════════════════
-//  URL HASH CONFIG  ← source of truth, cache-proof
-//  Format: #b64(JSON({profiles:[{id,name,token,gist,color}]}))
-// ═══════════════════════════════════════════════════
-function readHash() {
-  try {
-    const h = location.hash.slice(1);
-    if (!h) return null;
-    return JSON.parse(atob(h));
-  } catch(e) { return null; }
-}
-function writeHash(obj) {
-  // Use replaceState so the hash change doesn't add a history entry
-  history.replaceState(null, '', '#' + btoa(JSON.stringify(obj)));
-}
-function hashAddProfile(prof) {
-  const cur = readHash() || { profiles: [] };
-  // upsert by id
-  const idx = cur.profiles.findIndex(p => p.id === prof.id);
-  if (idx >= 0) cur.profiles[idx] = prof; else cur.profiles.push(prof);
-  writeHash(cur);
-}
-function hashRemoveProfile(id) {
-  const cur = readHash() || { profiles: [] };
-  cur.profiles = cur.profiles.filter(p => p.id !== id);
-  writeHash(cur);
-}
-function hashGetProfiles() {
-  const h = readHash();
-  return h?.profiles || [];
-}
+        <!-- HEATMAP -->
+        <div id="tab-heatmap" style="display: none">
+          <div class="sec">90-Day Heatmap</div>
+          <div
+            style="font-size: 10px; color: var(--muted); margin-bottom: 10px"
+          >
+            Tap any cell to jump to that day.
+          </div>
+          <div class="heatmap-scroll">
+            <div class="heatmap" id="heatmap"></div>
+          </div>
+          <div class="heat-legend">
+            <span>Less</span>
+            <div class="hcell h0" style="cursor: default"></div>
+            <div class="hcell h1" style="cursor: default"></div>
+            <div class="hcell h2" style="cursor: default"></div>
+            <div class="hcell h3" style="cursor: default"></div>
+            <div class="hcell h4" style="cursor: default"></div>
+            <span>More</span>
+          </div>
+          <div class="stats-grid" id="statsGrid"></div>
+        </div>
 
-// ═══════════════════════════════════════════════════
-//  PROFILE STORAGE  (localStorage = speed cache only)
-// ═══════════════════════════════════════════════════
-function loadProfiles() {
-  // Hash is the source of truth; localStorage is just a warm cache
-  const fromHash = hashGetProfiles();
-  if (fromHash.length) {
-    profiles = fromHash;
-    localStorage.setItem(PROFILE_KEY, JSON.stringify(profiles)); // keep cache warm
-    return;
-  }
-  // Fallback to localStorage cache (same-device, hash not yet set)
-  try { profiles = JSON.parse(localStorage.getItem(PROFILE_KEY)||'[]'); } catch(e){ profiles=[]; }
-}
-function saveProfiles() {
-  localStorage.setItem(PROFILE_KEY, JSON.stringify(profiles));
-  // Also persist every profile into the hash
-  const cur = readHash() || { profiles: [] };
-  cur.profiles = profiles;
-  writeHash(cur);
-}
+        <!-- MANAGE -->
+        <div id="tab-manage" style="display: none">
+          <div class="sec">Profile</div>
+          <div class="profile-card">
+            <h4>Your Details</h4>
+            <div class="prow">
+              <input
+                id="profileName"
+                placeholder="Your name"
+                onkeydown="if (event.key === 'Enter') updateProfile();"
+              />
+              <button class="btn btn-dark" onclick="updateProfile()">
+                Save
+              </button>
+            </div>
+            <div style="margin-top: 10px">
+              <div
+                style="
+                  font-size: 9px;
+                  letter-spacing: 1px;
+                  text-transform: uppercase;
+                  color: var(--muted);
+                  margin-bottom: 6px;
+                "
+              >
+                Profile Colour
+              </div>
+              <div class="color-opts" id="profileColors"></div>
+            </div>
+            <div class="pin-change-wrap">
+              <div
+                style="
+                  font-size: 9px;
+                  letter-spacing: 1px;
+                  text-transform: uppercase;
+                  color: var(--muted);
+                "
+              >
+                PIN Lock
+              </div>
+              <div class="pin-change-row">
+                <input
+                  id="newPin"
+                  type="password"
+                  maxlength="4"
+                  placeholder="new 4-digit PIN"
+                />
+                <button class="btn btn-dark" onclick="changePin()">
+                  Set PIN
+                </button>
+                <button class="btn" onclick="removePin()">Remove PIN</button>
+              </div>
+            </div>
+          </div>
 
-// ═══════════════════════════════════════════════════
-//  GIST API
-// ═══════════════════════════════════════════════════
-async function gistLoad(prof) {
-  setSyncState('busy','loading…');
-  const r = await fetch(`https://api.github.com/gists/${prof.gist}`, {
-    headers:{ Authorization:`token ${prof.token}`, Accept:'application/vnd.github.v3+json' }
-  });
-  if (!r.ok) throw new Error('load_failed');
-  const j = await r.json();
-  const raw = j.files[GIST_FILE]?.content || 'null';
-  return JSON.parse(raw);
-}
+          <div class="sec">Habits</div>
+          <div id="manageList"></div>
+          <div class="add-row">
+            <input
+              id="newName"
+              placeholder="New habit name..."
+              onkeydown="if (event.key === 'Enter') addHabit();"
+            />
+            <button
+              class="btn"
+              id="emojiBtn"
+              onclick="openEmoji(null)"
+              style="font-size: 16px; padding: 9px 11px"
+            >
+              🌟
+            </button>
+            <button class="btn btn-dark" onclick="addHabit()">+ Add</button>
+          </div>
 
-async function gistSave() {
-  if (!activeProf) return;
-  setSyncState('busy','saving…');
-  try {
-    const r = await fetch(`https://api.github.com/gists/${activeProf.gist}`, {
-      method:'PATCH',
-      headers:{ Authorization:`token ${activeProf.token}`,
-        'Content-Type':'application/json', Accept:'application/vnd.github.v3+json' },
-      body: JSON.stringify({ files:{ [GIST_FILE]:{ content: JSON.stringify(data,null,2) } } })
-    });
-    if (!r.ok) throw new Error('save_failed');
-    setSyncState('ok','synced');
-  } catch(e) {
-    setSyncState('err','save failed');
-    showToast('⚠ Save failed — check connection');
-  }
-}
+          <div class="sec" style="margin-top: 22px">Data & Access</div>
+          <div
+            style="
+              font-size: 10px;
+              color: var(--muted);
+              margin-bottom: 10px;
+              line-height: 1.6;
+            "
+          >
+            Your profile config is encoded in the URL hash.
+            <b>Bookmark or copy the URL below</b> — opening it on any device
+            gives instant access, even after cache clears.
+          </div>
+          <div style="display: flex; gap: 8px; flex-wrap: wrap">
+            <button class="btn btn-dark" onclick="copyMyURL()">
+              🔗 Copy My URL
+            </button>
+            <button class="btn" onclick="exportJSON()">⬇ Export JSON</button>
+            <button
+              class="btn"
+              onclick="document.getElementById('importFile').click()"
+            >
+              ⬆ Import JSON
+            </button>
+            <button
+              class="btn"
+              onclick="resetProfile()"
+              style="color: var(--red)"
+            >
+              ✕ Remove Profile
+            </button>
+          </div>
+          <input
+            type="file"
+            id="importFile"
+            accept=".json"
+            style="display: none"
+            onchange="importJSON(event)"
+          />
+        </div>
+      </main>
+    </div>
 
-function scheduleSave() { clearTimeout(saveTimer); saveTimer = setTimeout(gistSave, 1000); }
-function setSyncState(s,lbl) {
-  document.getElementById('sdot').className='sdot '+s;
-  document.getElementById('slabel').textContent=lbl;
-}
+    <!-- Emoji Picker -->
+    <div class="overlay" id="emojiOverlay">
+      <div class="modal">
+        <h3>Pick Emoji</h3>
+        <div class="egrid" id="emojiGrid"></div>
+        <button class="btn" onclick="closeEmoji()">Cancel</button>
+      </div>
+    </div>
 
-async function manualSync() {
-  try {
-    const remote = await gistLoad(activeProf);
-    if (remote && remote.habits) { data=remote; }
-    setSyncState('ok','synced');
-    renderCurrent(); showToast('↻ Synced');
-  } catch(e) { setSyncState('err','error'); showToast('⚠ Sync failed'); }
-}
+    <div class="toast" id="toast"></div>
 
-// ═══════════════════════════════════════════════════
-//  DATE HELPERS
-// ═══════════════════════════════════════════════════
-const todayStr = () => new Date().toISOString().slice(0,10);
+    <script>
+      // ═══════════════════════════════════════════════════
+      //  CONSTANTS
+      // ═══════════════════════════════════════════════════
+      const GIST_FILE = "habits.json";
+      const PROFILE_KEY = "hbt_profiles_v3"; // localStorage cache only — hash is source of truth
+      const COLORS = [
+        "#c4922a",
+        "#2e6640",
+        "#274870",
+        "#8c3228",
+        "#5b4c8a",
+        "#2a7070",
+        "#7a4c2a",
+        "#4a4a4a",
+      ];
+      const EMOJIS = [
+        "🌅",
+        "🎸",
+        "💪",
+        "💻",
+        "🤖",
+        "📓",
+        "🌿",
+        "🪥",
+        "🧘",
+        "🏃",
+        "🥊",
+        "🎹",
+        "📚",
+        "🎯",
+        "💧",
+        "🛌",
+        "🧠",
+        "✍️",
+        "🎨",
+        "🎵",
+        "🌱",
+        "🔥",
+        "⚡",
+        "🌟",
+        "🏋️",
+        "📖",
+        "🥗",
+        "☕",
+        "🎤",
+        "🎭",
+        "🌍",
+        "🍎",
+        "🧴",
+        "🪴",
+        "🎻",
+        "🥋",
+      ];
 
-function dateRange(n) {
-  return Array.from({length:n},(_,i)=>{
-    const d=new Date(); d.setDate(d.getDate()-(n-1-i)); return d.toISOString().slice(0,10);
-  });
-}
-function weekDates() {
-  const d=new Date(), day=d.getDay()||7;
-  return Array.from({length:7},(_,i)=>{
-    const dd=new Date(d); dd.setDate(d.getDate()-(day-1)+i); return dd.toISOString().slice(0,10);
-  });
-}
-function fmtLong(s) {
-  return new Date(s+'T00:00:00').toLocaleDateString('en-IN',{weekday:'long',day:'numeric',month:'long'});
-}
-function fmtShort(s) {
-  return new Date(s+'T00:00:00').toLocaleDateString('en-IN',{weekday:'short',day:'numeric',month:'short'});
-}
+      const DEFAULT_HABITS = () => [
+        { id: "wake", name: "Wake Up Early", emoji: "🌅", active: true },
+        { id: "guitar", name: "Guitar", emoji: "🎸", active: true },
+        { id: "gym", name: "Gym", emoji: "💪", active: true },
+        { id: "lc", name: "LeetCode", emoji: "💻", active: true },
+        { id: "ai", name: "AI Practice", emoji: "🤖", active: true },
+        { id: "journal", name: "Journal", emoji: "📓", active: true },
+        { id: "rose", name: "Rosemary Spray", emoji: "🌿", active: true },
+        { id: "brush", name: "Brush Twice", emoji: "🪥", active: true },
+      ];
 
-// ═══════════════════════════════════════════════════
-//  STREAK
-// ═══════════════════════════════════════════════════
-function streak(hid) {
-  let n=0; const d=new Date(); const t=todayStr();
-  if (!data.log?.[t]?.[hid]) d.setDate(d.getDate()-1);
-  for(let i=0;i<365;i++){
-    const s=d.toISOString().slice(0,10);
-    if(data.log?.[s]?.[hid]){n++;d.setDate(d.getDate()-1);}else break;
-  }
-  return n;
-}
+      // ═══════════════════════════════════════════════════
+      //  STATE
+      // ═══════════════════════════════════════════════════
+      let profiles = [];
+      let activeProf = null;
+      let data = {};
+      let logDate = "";
+      let currentTab = "log";
+      let saveTimer = null;
+      let emojiTarget = null;
+      let setupColor = COLORS[0];
 
-// ═══════════════════════════════════════════════════
-//  TOGGLE
-// ═══════════════════════════════════════════════════
-function toggle(hid) {
-  if(!data.log) data.log={};
-  if(!data.log[logDate]) data.log[logDate]={};
-  data.log[logDate][hid] = !data.log[logDate][hid];
-  scheduleSave(); renderLog();
-  showToast(data.log[logDate][hid]?'✓ Done!':'Unmarked');
-}
+      // ═══════════════════════════════════════════════════
+      //  URL HASH CONFIG  ← source of truth, cache-proof
+      //  Format: #b64(JSON({profiles:[{id,name,token,gist,color}]}))
+      // ═══════════════════════════════════════════════════
+      function readHash() {
+        try {
+          const h = location.hash.slice(1);
+          if (!h) return null;
+          return JSON.parse(atob(h));
+        } catch (e) {
+          return null;
+        }
+      }
+      function writeHash(obj) {
+        // Use replaceState so the hash change doesn't add a history entry
+        history.replaceState(null, "", "#" + btoa(JSON.stringify(obj)));
+      }
+      function hashAddProfile(prof) {
+        const cur = readHash() || { profiles: [] };
+        // upsert by id
+        const idx = cur.profiles.findIndex((p) => p.id === prof.id);
+        if (idx >= 0) cur.profiles[idx] = prof;
+        else cur.profiles.push(prof);
+        writeHash(cur);
+      }
+      function hashRemoveProfile(id) {
+        const cur = readHash() || { profiles: [] };
+        cur.profiles = cur.profiles.filter((p) => p.id !== id);
+        writeHash(cur);
+      }
+      function hashGetProfiles() {
+        const h = readHash();
+        return h?.profiles || [];
+      }
 
-// ═══════════════════════════════════════════════════
-//  LOG DATE NAVIGATION
-// ═══════════════════════════════════════════════════
-function changeLogDate(delta) {
-  const d = new Date(logDate+'T00:00:00'); d.setDate(d.getDate()+delta);
-  const nd = d.toISOString().slice(0,10);
-  if (nd > todayStr()) return;
-  logDate = nd; renderLog();
-}
-function jumpToDate(date) { logDate=date; showTab('log'); }
+      // ═══════════════════════════════════════════════════
+      //  PROFILE STORAGE  (localStorage = speed cache only)
+      // ═══════════════════════════════════════════════════
+      function loadProfiles() {
+        // Hash is the source of truth; localStorage is just a warm cache
+        const fromHash = hashGetProfiles();
+        if (fromHash.length) {
+          profiles = fromHash;
+          localStorage.setItem(PROFILE_KEY, JSON.stringify(profiles)); // keep cache warm
+          return;
+        }
+        // Fallback to localStorage cache (same-device, hash not yet set)
+        try {
+          profiles = JSON.parse(localStorage.getItem(PROFILE_KEY) || "[]");
+        } catch (e) {
+          profiles = [];
+        }
+      }
+      function saveProfiles() {
+        localStorage.setItem(PROFILE_KEY, JSON.stringify(profiles));
+        // Also persist every profile into the hash
+        const cur = readHash() || { profiles: [] };
+        cur.profiles = profiles;
+        writeHash(cur);
+      }
 
-// ═══════════════════════════════════════════════════
-//  RENDER LOG
-// ═══════════════════════════════════════════════════
-function renderLog() {
-  const t=todayStr(), isToday=logDate===t;
-  const d=new Date(logDate+'T00:00:00');
-  document.getElementById('logWd').textContent=d.toLocaleDateString('en-IN',{weekday:'long'});
-  document.getElementById('logDm').textContent=d.toLocaleDateString('en-IN',{day:'numeric',month:'long'});
-  document.getElementById('backdateTag').style.display=isToday?'none':'inline-flex';
-  document.getElementById('btnNext').disabled=isToday;
+      // ═══════════════════════════════════════════════════
+      //  GIST API
+      // ═══════════════════════════════════════════════════
+      async function gistLoad(prof) {
+        setSyncState("busy", "loading…");
+        const r = await fetch(`https://api.github.com/gists/${prof.gist}`, {
+          headers: {
+            Authorization: `token ${prof.token}`,
+            Accept: "application/vnd.github.v3+json",
+          },
+        });
+        if (!r.ok) throw new Error("load_failed");
+        const j = await r.json();
+        const raw = j.files[GIST_FILE]?.content || "null";
+        return JSON.parse(raw);
+      }
 
-  const active=(data.habits||[]).filter(h=>h.active);
-  const done=active.filter(h=>data.log?.[logDate]?.[h.id]).length, total=active.length;
-  const pct=total?done/total:0, C=163.4;
-  document.getElementById('ringFg').style.strokeDashoffset=C*(1-pct);
-  document.getElementById('ringTxt').textContent=Math.round(pct*100)+'%';
-  document.getElementById('ringFrac').textContent=`${done}/${total}`;
+      async function gistSave() {
+        if (!activeProf) return;
+        setSyncState("busy", "saving…");
+        try {
+          const r = await fetch(
+            `https://api.github.com/gists/${activeProf.gist}`,
+            {
+              method: "PATCH",
+              headers: {
+                Authorization: `token ${activeProf.token}`,
+                "Content-Type": "application/json",
+                Accept: "application/vnd.github.v3+json",
+              },
+              body: JSON.stringify({
+                files: {
+                  [GIST_FILE]: { content: JSON.stringify(data, null, 2) },
+                },
+              }),
+            },
+          );
+          if (!r.ok) throw new Error("save_failed");
+          setSyncState("ok", "synced");
+        } catch (e) {
+          setSyncState("err", "save failed");
+          showToast("⚠ Save failed — check connection");
+        }
+      }
 
-  document.getElementById('habitCards').innerHTML=active.map(h=>{
-    const isDone=!!data.log?.[logDate]?.[h.id];
-    const s=isToday?streak(h.id):null;
-    return `<div class="hcard${isDone?' done':''}" onclick="toggle('${h.id}')">
+      function scheduleSave() {
+        clearTimeout(saveTimer);
+        saveTimer = setTimeout(gistSave, 1000);
+      }
+      function setSyncState(s, lbl) {
+        document.getElementById("sdot").className = "sdot " + s;
+        document.getElementById("slabel").textContent = lbl;
+      }
+
+      async function manualSync() {
+        try {
+          const remote = await gistLoad(activeProf);
+          if (remote && remote.habits) {
+            data = remote;
+          }
+          setSyncState("ok", "synced");
+          renderCurrent();
+          showToast("↻ Synced");
+        } catch (e) {
+          setSyncState("err", "error");
+          showToast("⚠ Sync failed");
+        }
+      }
+
+      // ═══════════════════════════════════════════════════
+      //  DATE HELPERS
+      // ═══════════════════════════════════════════════════
+      const todayStr = () => new Date().toISOString().slice(0, 10);
+
+      function dateRange(n) {
+        return Array.from({ length: n }, (_, i) => {
+          const d = new Date();
+          d.setDate(d.getDate() - (n - 1 - i));
+          return d.toISOString().slice(0, 10);
+        });
+      }
+      function weekDates() {
+        const d = new Date(),
+          day = d.getDay() || 7;
+        return Array.from({ length: 7 }, (_, i) => {
+          const dd = new Date(d);
+          dd.setDate(d.getDate() - (day - 1) + i);
+          return dd.toISOString().slice(0, 10);
+        });
+      }
+      function fmtLong(s) {
+        return new Date(s + "T00:00:00").toLocaleDateString("en-IN", {
+          weekday: "long",
+          day: "numeric",
+          month: "long",
+        });
+      }
+      function fmtShort(s) {
+        return new Date(s + "T00:00:00").toLocaleDateString("en-IN", {
+          weekday: "short",
+          day: "numeric",
+          month: "short",
+        });
+      }
+
+      // ═══════════════════════════════════════════════════
+      //  STREAK
+      // ═══════════════════════════════════════════════════
+      function streak(hid) {
+        let n = 0;
+        const d = new Date();
+        const t = todayStr();
+        if (!data.log?.[t]?.[hid]) d.setDate(d.getDate() - 1);
+        for (let i = 0; i < 365; i++) {
+          const s = d.toISOString().slice(0, 10);
+          if (data.log?.[s]?.[hid]) {
+            n++;
+            d.setDate(d.getDate() - 1);
+          } else break;
+        }
+        return n;
+      }
+
+      // ═══════════════════════════════════════════════════
+      //  TOGGLE
+      // ═══════════════════════════════════════════════════
+      function toggle(hid) {
+        if (!data.log) data.log = {};
+        if (!data.log[logDate]) data.log[logDate] = {};
+        data.log[logDate][hid] = !data.log[logDate][hid];
+        scheduleSave();
+        renderLog();
+        showToast(data.log[logDate][hid] ? "✓ Done!" : "Unmarked");
+      }
+
+      // ═══════════════════════════════════════════════════
+      //  LOG DATE NAVIGATION
+      // ═══════════════════════════════════════════════════
+      function changeLogDate(delta) {
+        const d = new Date(logDate + "T00:00:00");
+        d.setDate(d.getDate() + delta);
+        const nd = d.toISOString().slice(0, 10);
+        if (nd > todayStr()) return;
+        logDate = nd;
+        renderLog();
+      }
+      function jumpToDate(date) {
+        logDate = date;
+        showTab("log");
+      }
+
+      // ═══════════════════════════════════════════════════
+      //  RENDER LOG
+      // ═══════════════════════════════════════════════════
+      function renderLog() {
+        const t = todayStr(),
+          isToday = logDate === t;
+        const d = new Date(logDate + "T00:00:00");
+        document.getElementById("logWd").textContent = d.toLocaleDateString(
+          "en-IN",
+          { weekday: "long" },
+        );
+        document.getElementById("logDm").textContent = d.toLocaleDateString(
+          "en-IN",
+          { day: "numeric", month: "long" },
+        );
+        document.getElementById("backdateTag").style.display = isToday
+          ? "none"
+          : "inline-flex";
+        document.getElementById("btnNext").disabled = isToday;
+
+        const active = (data.habits || []).filter((h) => h.active);
+        const done = active.filter((h) => data.log?.[logDate]?.[h.id]).length,
+          total = active.length;
+        const pct = total ? done / total : 0,
+          C = 201.1;
+        document.getElementById("ringFg").style.strokeDashoffset =
+          C * (1 - pct);
+        document.getElementById("ringTxt").textContent =
+          Math.round(pct * 100) + "%";
+        document.getElementById("ringFrac").textContent =
+          `${done}/${total} done`;
+
+        // last 7 days for mini dots
+        const last7 = dateRange(7);
+
+        document.getElementById("habitCards").innerHTML = active
+          .map((h) => {
+            const isDone = !!data.log?.[logDate]?.[h.id];
+            const s = isToday ? streak(h.id) : null;
+            // mini 7-day dots
+            const dots = last7
+              .map((date) => {
+                const isT = date === t;
+                const on = !!data.log?.[date]?.[h.id];
+                if (isT && on)
+                  return `<div class="hcard-dot today-on" title="Today"></div>`;
+                if (on)
+                  return `<div class="hcard-dot on" title="${date}"></div>`;
+                return `<div class="hcard-dot" title="${date}"></div>`;
+              })
+              .join("");
+            // motivational label
+            const motivate = isDone
+              ? [
+                  "Great work! 🎉",
+                  "Keep it up! 🔥",
+                  "Crushing it! 💪",
+                  "One step further ✨",
+                  "Habit locked in 🔒",
+                ][Math.floor(Math.random() * 5)]
+              : s > 0
+                ? `Don't break your ${s}-day streak!`
+                : "Start your streak today";
+            return `<div class="hcard${isDone ? " done" : ""}" onclick="toggle('${h.id}')">
       <div class="hemoji">${h.emoji}</div>
       <div class="hinfo">
         <div class="hname">${h.name}</div>
-        <div class="hstreak">${s!==null?`Streak: <b>${s} day${s!==1?'s':''}</b>`:'&nbsp;'}</div>
+        <div class="hstreak-row">
+          <div class="hstreak">${s !== null ? `<b>${s}</b> day streak` : "&nbsp;"}</div>
+        </div>
+        <div style="font-size:10px;color:${isDone ? "var(--green)" : "var(--muted)"};margin-bottom:8px;font-style:italic">${isToday ? motivate : "&nbsp;"}</div>
+        <div class="hcard-dots">${dots}</div>
       </div>
-      <div class="chk">${isDone?'✓':''}</div>
+      <div class="chk">${isDone ? "✓" : ""}</div>
     </div>`;
-  }).join('');
-}
+          })
+          .join("");
+      }
 
-// ═══════════════════════════════════════════════════
-//  RENDER WEEK
-// ═══════════════════════════════════════════════════
-function renderWeek() {
-  const days=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
-  const dates=weekDates(), t=todayStr();
-  const active=(data.habits||[]).filter(h=>h.active);
-  document.getElementById('weekLabels').innerHTML=days.map(d=>`<div class="wlabel">${d}</div>`).join('');
-  document.getElementById('weekCells').innerHTML=dates.map(date=>{
-    const log=data.log?.[date]||{};
-    const done=active.filter(h=>log[h.id]).length, total=active.length;
-    const isPast=date<=t, isT=date===t, isViewing=date===logDate&&!isT;
-    let cls='future';
-    if(isPast&&total>0){const r=done/total;cls=r===1?'all':r>=0.7?'good':r>=0.4?'half':r>0?'low':'none';}
-    return `<div class="wcell ${cls}${isT?' today':''}${isViewing?' viewing':''}"
+      // ═══════════════════════════════════════════════════
+      //  RENDER WEEK
+      // ═══════════════════════════════════════════════════
+      function renderWeek() {
+        const days = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+        const dates = weekDates(),
+          t = todayStr();
+        const active = (data.habits || []).filter((h) => h.active);
+        document.getElementById("weekLabels").innerHTML = days
+          .map((d) => `<div class="wlabel">${d}</div>`)
+          .join("");
+        document.getElementById("weekCells").innerHTML = dates
+          .map((date) => {
+            const log = data.log?.[date] || {};
+            const done = active.filter((h) => log[h.id]).length,
+              total = active.length;
+            const isPast = date <= t,
+              isT = date === t,
+              isViewing = date === logDate && !isT;
+            let cls = "future";
+            if (isPast && total > 0) {
+              const r = done / total;
+              cls =
+                r === 1
+                  ? "all"
+                  : r >= 0.7
+                    ? "good"
+                    : r >= 0.4
+                      ? "half"
+                      : r > 0
+                        ? "low"
+                        : "none";
+            }
+            return `<div class="wcell ${cls}${isT ? " today" : ""}${isViewing ? " viewing" : ""}"
       onclick="jumpToDate('${date}')" title="${fmtShort(date)}: ${done}/${total}">
-      ${isPast&&done>0?done:''}
+      ${isPast && done > 0 ? done : ""}
     </div>`;
-  }).join('');
-  document.getElementById('weekPerHabit').innerHTML=active.map(h=>{
-    const dots=dates.map(date=>{
-      const isPast=date<=t, done=data.log?.[date]?.[h.id];
-      const bg=!isPast?'var(--paper3)':done?'var(--green)':'var(--red)';
-      return `<div class="phrdot" style="background:${bg}" title="${fmtShort(date)}" onclick="jumpToDate('${date}')"></div>`;
-    }).join('');
-    const wd=dates.filter(d=>d<=t&&data.log?.[d]?.[h.id]).length;
-    const wt=dates.filter(d=>d<=t).length;
-    return `<div class="phr">
+          })
+          .join("");
+        document.getElementById("weekPerHabit").innerHTML = active
+          .map((h) => {
+            const dots = dates
+              .map((date) => {
+                const isPast = date <= t,
+                  done = data.log?.[date]?.[h.id];
+                const bg = !isPast
+                  ? "var(--paper3)"
+                  : done
+                    ? "var(--green)"
+                    : "var(--red)";
+                return `<div class="phrdot" style="background:${bg}" title="${fmtShort(date)}" onclick="jumpToDate('${date}')"></div>`;
+              })
+              .join("");
+            const wd = dates.filter(
+              (d) => d <= t && data.log?.[d]?.[h.id],
+            ).length;
+            const wt = dates.filter((d) => d <= t).length;
+            return `<div class="phr">
       <div class="phr-top">
         <span style="font-size:17px">${h.emoji}</span>
         <span style="font-size:12px;font-weight:500;flex:1">${h.name}</span>
@@ -742,350 +2170,532 @@ function renderWeek() {
       </div>
       <div class="phr-dots">${dots}</div>
     </div>`;
-  }).join('');
-}
+          })
+          .join("");
+      }
 
-// ═══════════════════════════════════════════════════
-//  RENDER MISSED
-// ═══════════════════════════════════════════════════
-function renderMissed() {
-  const range=dateRange(30), t=todayStr();
-  const active=(data.habits||[]).filter(h=>h.active);
-  const rows=active.map(h=>{
-    const missed=range.filter(d=>d<t&&!data.log?.[d]?.[h.id]).length;
-    const dots=range.map(d=>{
-      if(d>=t) return '';
-      const done=data.log?.[d]?.[h.id];
-      return `<div class="mdot" style="background:${done?'var(--green)':'var(--red)'}"
+      // ═══════════════════════════════════════════════════
+      //  RENDER MISSED
+      // ═══════════════════════════════════════════════════
+      function renderMissed() {
+        const range = dateRange(30),
+          t = todayStr();
+        const active = (data.habits || []).filter((h) => h.active);
+        const rows = active
+          .map((h) => {
+            const missed = range.filter(
+              (d) => d < t && !data.log?.[d]?.[h.id],
+            ).length;
+            const dots = range
+              .map((d) => {
+                if (d >= t) return "";
+                const done = data.log?.[d]?.[h.id];
+                return `<div class="mdot" style="background:${done ? "var(--green)" : "var(--red)"}"
         title="${fmtShort(d)}" onclick="jumpToDate('${d}')"></div>`;
-    }).join('');
-    return {h,missed,dots};
-  }).sort((a,b)=>b.missed-a.missed);
-  document.getElementById('missedList').innerHTML=rows.map(({h,missed,dots})=>
-    `<div class="missed-card">
+              })
+              .join("");
+            return { h, missed, dots };
+          })
+          .sort((a, b) => b.missed - a.missed);
+        document.getElementById("missedList").innerHTML = rows
+          .map(
+            ({ h, missed, dots }) =>
+              `<div class="missed-card">
       <div class="missed-top">
         <span style="font-size:22px">${h.emoji}</span>
         <div style="flex:1">
           <div style="font-size:12px;font-weight:500">${h.name}</div>
-          <div style="font-size:10px;margin-top:2px;color:${missed>10?'var(--red)':missed>5?'var(--gold)':'var(--muted)'}">
+          <div style="font-size:10px;margin-top:2px;color:${missed > 10 ? "var(--red)" : missed > 5 ? "var(--gold)" : "var(--muted)"}">
             ${missed} missed in last 30 days
           </div>
         </div>
       </div>
       <div class="mdots">${dots}</div>
-    </div>`
-  ).join('');
-}
+    </div>`,
+          )
+          .join("");
+      }
 
-// ═══════════════════════════════════════════════════
-//  RENDER HEATMAP
-// ═══════════════════════════════════════════════════
-function renderHeatmap() {
-  const range=dateRange(91), t=todayStr();
-  const active=(data.habits||[]).filter(h=>h.active);
-  document.getElementById('heatmap').innerHTML=range.map(date=>{
-    if(date>t) return `<div class="hcell h0" style="cursor:default"></div>`;
-    const done=active.filter(h=>data.log?.[date]?.[h.id]).length, total=active.length;
-    const r=total?done/total:0;
-    const lvl=r===0?0:r<=0.25?1:r<=0.5?2:r<=0.75?3:4;
-    return `<div class="hcell h${lvl}" title="${fmtShort(date)}: ${done}/${total}"
+      // ═══════════════════════════════════════════════════
+      //  RENDER HEATMAP
+      // ═══════════════════════════════════════════════════
+      function renderHeatmap() {
+        const range = dateRange(91),
+          t = todayStr();
+        const active = (data.habits || []).filter((h) => h.active);
+        document.getElementById("heatmap").innerHTML = range
+          .map((date) => {
+            if (date > t)
+              return `<div class="hcell h0" style="cursor:default"></div>`;
+            const done = active.filter((h) => data.log?.[date]?.[h.id]).length,
+              total = active.length;
+            const r = total ? done / total : 0;
+            const lvl =
+              r === 0 ? 0 : r <= 0.25 ? 1 : r <= 0.5 ? 2 : r <= 0.75 ? 3 : 4;
+            return `<div class="hcell h${lvl}" title="${fmtShort(date)}: ${done}/${total}"
       onclick="jumpToDate('${date}')"></div>`;
-  }).join('');
-  const past=range.filter(d=>d<=t);
-  const totalDone=past.reduce((s,d)=>s+active.filter(h=>data.log?.[d]?.[h.id]).length,0);
-  const possible=past.length*active.length;
-  const perfect=past.filter(d=>active.every(h=>data.log?.[d]?.[h.id])).length;
-  let best=0,cur=0;
-  past.forEach(d=>{const a=active.length>0&&active.every(h=>data.log?.[d]?.[h.id]);a?(cur++,best=Math.max(best,cur)):cur=0;});
-  let cStr=0;const dd=new Date();dd.setDate(dd.getDate()-1);
-  for(let i=0;i<365;i++){const s=dd.toISOString().slice(0,10);if(active.every(h=>data.log?.[s]?.[h.id])){cStr++;dd.setDate(dd.getDate()-1);}else break;}
-  document.getElementById('statsGrid').innerHTML=[
-    {v:totalDone,l:'Total Completions'},{v:perfect,l:'Perfect Days'},
-    {v:best,l:'Best Streak'},{v:cStr,l:'Current Streak'},
-    {v:possible?Math.round(totalDone/possible*100)+'%':'—',l:'Completion Rate'},
-    {v:active.length,l:'Active Habits'},
-  ].map(s=>`<div class="stat-card"><div class="sv">${s.v}</div><div class="sl">${s.l}</div></div>`).join('');
-}
+          })
+          .join("");
+        const past = range.filter((d) => d <= t);
+        const totalDone = past.reduce(
+          (s, d) => s + active.filter((h) => data.log?.[d]?.[h.id]).length,
+          0,
+        );
+        const possible = past.length * active.length;
+        const perfect = past.filter((d) =>
+          active.every((h) => data.log?.[d]?.[h.id]),
+        ).length;
+        let best = 0,
+          cur = 0;
+        past.forEach((d) => {
+          const a =
+            active.length > 0 && active.every((h) => data.log?.[d]?.[h.id]);
+          a ? (cur++, (best = Math.max(best, cur))) : (cur = 0);
+        });
+        let cStr = 0;
+        const dd = new Date();
+        dd.setDate(dd.getDate() - 1);
+        for (let i = 0; i < 365; i++) {
+          const s = dd.toISOString().slice(0, 10);
+          if (active.every((h) => data.log?.[s]?.[h.id])) {
+            cStr++;
+            dd.setDate(dd.getDate() - 1);
+          } else break;
+        }
+        document.getElementById("statsGrid").innerHTML = [
+          { v: totalDone, l: "Total Completions" },
+          { v: perfect, l: "Perfect Days" },
+          { v: best, l: "Best Streak" },
+          { v: cStr, l: "Current Streak" },
+          {
+            v: possible ? Math.round((totalDone / possible) * 100) + "%" : "—",
+            l: "Completion Rate",
+          },
+          { v: active.length, l: "Active Habits" },
+        ]
+          .map(
+            (s) =>
+              `<div class="stat-card"><div class="sv">${s.v}</div><div class="sl">${s.l}</div></div>`,
+          )
+          .join("");
+      }
 
-// ═══════════════════════════════════════════════════
-//  RENDER MANAGE
-// ═══════════════════════════════════════════════════
-function renderManage() {
-  document.getElementById('profileName').value=data.name||'';
-  renderColorPicker('profileColors', data.color||COLORS[0], (c)=>{
-    data.color=c; activeProf.color=c; saveProfiles(); updateAccent(c); scheduleSave();
-    renderColorPicker('profileColors',c,arguments.callee);
-  });
-  document.getElementById('manageList').innerHTML=(data.habits||[]).map((h,i)=>`
+      // ═══════════════════════════════════════════════════
+      //  RENDER MANAGE
+      // ═══════════════════════════════════════════════════
+      function renderManage() {
+        document.getElementById("profileName").value = data.name || "";
+        renderColorPicker("profileColors", data.color || COLORS[0], (c) => {
+          data.color = c;
+          activeProf.color = c;
+          saveProfiles();
+          updateAccent(c);
+          scheduleSave();
+          renderColorPicker("profileColors", c, arguments.callee);
+        });
+        document.getElementById("manageList").innerHTML = (data.habits || [])
+          .map(
+            (h, i) => `
     <div class="mrow">
       <span class="moji" onclick="openEmoji(${i})">${h.emoji}</span>
       <input type="text" value="${h.name}" onchange="data.habits[${i}].name=this.value;scheduleSave()">
       <label class="toggle-lbl">
-        <input type="checkbox" ${h.active?'checked':''} onchange="data.habits[${i}].active=this.checked;scheduleSave();renderManage()">Active
+        <input type="checkbox" ${h.active ? "checked" : ""} onchange="data.habits[${i}].active=this.checked;scheduleSave();renderManage()">Active
       </label>
       <button class="del-btn" onclick="delHabit(${i})">✕</button>
-    </div>`).join('');
-}
+    </div>`,
+          )
+          .join("");
+      }
 
-function updateProfile() {
-  const name=document.getElementById('profileName').value.trim();
-  if(!name){showToast('Name cannot be empty');return;}
-  data.name=name; activeProf.name=name; saveProfiles(); updateHeader(); scheduleSave();
-  showToast('Profile saved');
-}
-function changePin() {
-  const p=document.getElementById('newPin').value.trim();
-  if(p.length!==4||!/^\d{4}$/.test(p)){showToast('PIN must be 4 digits');return;}
-  data.pin=p; scheduleSave(); document.getElementById('newPin').value=''; showToast('PIN updated ✓');
-}
-function removePin() {
-  if(!confirm('Remove PIN lock for this profile?')) return;
-  delete data.pin; scheduleSave(); showToast('PIN removed');
-}
-function delHabit(i) {
-  if(!confirm(`Delete "${data.habits[i].name}"? Log history is kept.`)) return;
-  data.habits.splice(i,1); scheduleSave(); renderManage();
-}
-function addHabit() {
-  const name=document.getElementById('newName').value.trim(); if(!name) return;
-  const emoji=document.getElementById('emojiBtn').textContent;
-  if(!data.habits) data.habits=[];
-  data.habits.push({id:'h'+Date.now(),name,emoji,active:true});
-  scheduleSave();
-  document.getElementById('newName').value='';
-  document.getElementById('emojiBtn').textContent='🌟';
-  renderManage(); showToast('Habit added!');
-}
-function resetProfile() {
-  if(!confirm('Remove this profile? Your Gist data stays safe. Re-add it anytime with the same token + Gist ID.')) return;
-  profiles = profiles.filter(p => p.id !== activeProf.id);
-  hashRemoveProfile(activeProf.id);
-  localStorage.setItem(PROFILE_KEY, JSON.stringify(profiles));
-  activeProf=null; data={};
-  location.reload();
-}
-function copyMyURL() {
-  const url = location.href;
-  navigator.clipboard.writeText(url)
-    .then(() => showToast('✓ URL copied — bookmark this!'))
-    .catch(() => prompt('Copy and bookmark this URL:', url));
-}
-function exportJSON() {
-  const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
-  const a=document.createElement('a'); a.href=URL.createObjectURL(blob);
-  a.download=`habits_${todayStr()}.json`; a.click();
-}
-function importJSON(e) {
-  const file=e.target.files[0]; if(!file) return;
-  const r=new FileReader();
-  r.onload=ev=>{try{data=JSON.parse(ev.target.result);gistSave();renderCurrent();showToast('Imported!');}catch(err){alert('Invalid JSON');}};
-  r.readAsText(file); e.target.value='';
-}
+      function updateProfile() {
+        const name = document.getElementById("profileName").value.trim();
+        if (!name) {
+          showToast("Name cannot be empty");
+          return;
+        }
+        data.name = name;
+        activeProf.name = name;
+        saveProfiles();
+        updateHeader();
+        scheduleSave();
+        showToast("Profile saved");
+      }
+      function changePin() {
+        const p = document.getElementById("newPin").value.trim();
+        if (p.length !== 4 || !/^\d{4}$/.test(p)) {
+          showToast("PIN must be 4 digits");
+          return;
+        }
+        data.pin = p;
+        scheduleSave();
+        document.getElementById("newPin").value = "";
+        showToast("PIN updated ✓");
+      }
+      function removePin() {
+        if (!confirm("Remove PIN lock for this profile?")) return;
+        delete data.pin;
+        scheduleSave();
+        showToast("PIN removed");
+      }
+      function delHabit(i) {
+        if (!confirm(`Delete "${data.habits[i].name}"? Log history is kept.`))
+          return;
+        data.habits.splice(i, 1);
+        scheduleSave();
+        renderManage();
+      }
+      function addHabit() {
+        const name = document.getElementById("newName").value.trim();
+        if (!name) return;
+        const emoji = document.getElementById("emojiBtn").textContent;
+        if (!data.habits) data.habits = [];
+        data.habits.push({ id: "h" + Date.now(), name, emoji, active: true });
+        scheduleSave();
+        document.getElementById("newName").value = "";
+        document.getElementById("emojiBtn").textContent = "🌟";
+        renderManage();
+        showToast("Habit added!");
+      }
+      function resetProfile() {
+        if (
+          !confirm(
+            "Remove this profile? Your Gist data stays safe. Re-add it anytime with the same token + Gist ID.",
+          )
+        )
+          return;
+        profiles = profiles.filter((p) => p.id !== activeProf.id);
+        hashRemoveProfile(activeProf.id);
+        localStorage.setItem(PROFILE_KEY, JSON.stringify(profiles));
+        activeProf = null;
+        data = {};
+        location.reload();
+      }
+      function copyMyURL() {
+        const url = location.href;
+        navigator.clipboard
+          .writeText(url)
+          .then(() => showToast("✓ URL copied — bookmark this!"))
+          .catch(() => prompt("Copy and bookmark this URL:", url));
+      }
+      function exportJSON() {
+        const blob = new Blob([JSON.stringify(data, null, 2)], {
+          type: "application/json",
+        });
+        const a = document.createElement("a");
+        a.href = URL.createObjectURL(blob);
+        a.download = `habits_${todayStr()}.json`;
+        a.click();
+      }
+      function importJSON(e) {
+        const file = e.target.files[0];
+        if (!file) return;
+        const r = new FileReader();
+        r.onload = (ev) => {
+          try {
+            data = JSON.parse(ev.target.result);
+            gistSave();
+            renderCurrent();
+            showToast("Imported!");
+          } catch (err) {
+            alert("Invalid JSON");
+          }
+        };
+        r.readAsText(file);
+        e.target.value = "";
+      }
 
-// ═══════════════════════════════════════════════════
-//  COLOR PICKER
-// ═══════════════════════════════════════════════════
-function renderColorPicker(containerId, selected, onPick) {
-  document.getElementById(containerId).innerHTML=COLORS.map(c=>
-    `<div class="copt${c===selected?' sel':''}" style="background:${c}"
-      onclick='(${onPick.toString()})("${c}")'></div>`
-  ).join('');
-}
-function updateAccent(color) {
-  document.documentElement.style.setProperty('--accent',color);
-}
+      // ═══════════════════════════════════════════════════
+      //  COLOR PICKER
+      // ═══════════════════════════════════════════════════
+      function renderColorPicker(containerId, selected, onPick) {
+        document.getElementById(containerId).innerHTML = COLORS.map(
+          (c) =>
+            `<div class="copt${c === selected ? " sel" : ""}" style="background:${c}"
+      onclick='(${onPick.toString()})("${c}")'></div>`,
+        ).join("");
+      }
+      function updateAccent(color) {
+        document.documentElement.style.setProperty("--accent", color);
+      }
 
-// ═══════════════════════════════════════════════════
-//  EMOJI PICKER
-// ═══════════════════════════════════════════════════
-function openEmoji(idx) {
-  emojiTarget=idx;
-  document.getElementById('emojiGrid').innerHTML=
-    EMOJIS.map(e=>`<div class="eopt" onclick="pickEmoji('${e}')">${e}</div>`).join('');
-  document.getElementById('emojiOverlay').classList.add('open');
-}
-function closeEmoji(){ document.getElementById('emojiOverlay').classList.remove('open'); }
-function pickEmoji(e) {
-  if(emojiTarget===null) document.getElementById('emojiBtn').textContent=e;
-  else { data.habits[emojiTarget].emoji=e; scheduleSave(); renderManage(); }
-  closeEmoji();
-}
+      // ═══════════════════════════════════════════════════
+      //  EMOJI PICKER
+      // ═══════════════════════════════════════════════════
+      function openEmoji(idx) {
+        emojiTarget = idx;
+        document.getElementById("emojiGrid").innerHTML = EMOJIS.map(
+          (e) => `<div class="eopt" onclick="pickEmoji('${e}')">${e}</div>`,
+        ).join("");
+        document.getElementById("emojiOverlay").classList.add("open");
+      }
+      function closeEmoji() {
+        document.getElementById("emojiOverlay").classList.remove("open");
+      }
+      function pickEmoji(e) {
+        if (emojiTarget === null)
+          document.getElementById("emojiBtn").textContent = e;
+        else {
+          data.habits[emojiTarget].emoji = e;
+          scheduleSave();
+          renderManage();
+        }
+        closeEmoji();
+      }
 
-// ═══════════════════════════════════════════════════
-//  TABS
-// ═══════════════════════════════════════════════════
-function showTab(name) {
-  currentTab=name;
-  ['log','week','missed','heatmap','manage'].forEach(t=>{
-    document.getElementById('tab-'+t).style.display=t===name?'block':'none';
-    document.querySelector(`[data-tab="${t}"]`).classList.toggle('active',t===name);
-  });
-  renderCurrent();
-}
-function renderCurrent() {
-  if(currentTab==='log') renderLog();
-  else if(currentTab==='week') renderWeek();
-  else if(currentTab==='missed') renderMissed();
-  else if(currentTab==='heatmap') renderHeatmap();
-  else if(currentTab==='manage') renderManage();
-}
+      // ═══════════════════════════════════════════════════
+      //  TABS
+      // ═══════════════════════════════════════════════════
+      function showTab(name) {
+        currentTab = name;
+        ["log", "week", "missed", "heatmap", "manage"].forEach((t) => {
+          document.getElementById("tab-" + t).style.display =
+            t === name ? "block" : "none";
+          document
+            .querySelector(`[data-tab="${t}"]`)
+            .classList.toggle("active", t === name);
+        });
+        renderCurrent();
+      }
+      function renderCurrent() {
+        if (currentTab === "log") renderLog();
+        else if (currentTab === "week") renderWeek();
+        else if (currentTab === "missed") renderMissed();
+        else if (currentTab === "heatmap") renderHeatmap();
+        else if (currentTab === "manage") renderManage();
+      }
 
-// ═══════════════════════════════════════════════════
-//  TOAST
-// ═══════════════════════════════════════════════════
-let toastTimer;
-function showToast(msg) {
-  const t=document.getElementById('toast');
-  t.textContent=msg; t.classList.add('show');
-  clearTimeout(toastTimer); toastTimer=setTimeout(()=>t.classList.remove('show'),2000);
-}
+      // ═══════════════════════════════════════════════════
+      //  TOAST
+      // ═══════════════════════════════════════════════════
+      let toastTimer;
+      function showToast(msg) {
+        const t = document.getElementById("toast");
+        t.textContent = msg;
+        t.classList.add("show");
+        clearTimeout(toastTimer);
+        toastTimer = setTimeout(() => t.classList.remove("show"), 2000);
+      }
 
-// ═══════════════════════════════════════════════════
-//  PIN SCREEN
-// ═══════════════════════════════════════════════════
-let pinEntry='';
-function showPinScreen(prof) {
-  document.getElementById('pinGreeting').textContent='Welcome back,';
-  document.getElementById('pinTitle').textContent=prof.name||'Your Habits';
-  const dot=document.querySelector('#screenPin .pin-title');
-  if(dot) dot.style.color=prof.color||COLORS[0];
-  pinEntry=''; updatePinDots(); document.getElementById('pinErr').textContent='';
-  showScreen('screenPin');
-}
-function pinKey(k) {
-  if(pinEntry.length>=4) return;
-  pinEntry+=k; updatePinDots();
-  if(pinEntry.length===4) setTimeout(checkPin,120);
-}
-function pinDel() { pinEntry=pinEntry.slice(0,-1); updatePinDots(); }
-function updatePinDots() {
-  document.querySelectorAll('.pdot').forEach((d,i)=>d.classList.toggle('filled',i<pinEntry.length));
-}
-function checkPin() {
-  if(pinEntry===data.pin) { launchApp(); }
-  else {
-    document.getElementById('pinDots').classList.add('shake');
-    document.getElementById('pinErr').textContent='Incorrect PIN — try again';
-    setTimeout(()=>document.getElementById('pinDots').classList.remove('shake'),350);
-    pinEntry=''; updatePinDots();
-  }
-}
+      // ═══════════════════════════════════════════════════
+      //  PIN SCREEN
+      // ═══════════════════════════════════════════════════
+      let pinEntry = "";
+      function showPinScreen(prof) {
+        document.getElementById("pinGreeting").textContent = "Welcome back,";
+        document.getElementById("pinTitle").textContent =
+          prof.name || "Your Habits";
+        const dot = document.querySelector("#screenPin .pin-title");
+        if (dot) dot.style.color = prof.color || COLORS[0];
+        pinEntry = "";
+        updatePinDots();
+        document.getElementById("pinErr").textContent = "";
+        showScreen("screenPin");
+      }
+      function pinKey(k) {
+        if (pinEntry.length >= 4) return;
+        pinEntry += k;
+        updatePinDots();
+        if (pinEntry.length === 4) setTimeout(checkPin, 120);
+      }
+      function pinDel() {
+        pinEntry = pinEntry.slice(0, -1);
+        updatePinDots();
+      }
+      function updatePinDots() {
+        document
+          .querySelectorAll(".pdot")
+          .forEach((d, i) => d.classList.toggle("filled", i < pinEntry.length));
+      }
+      function checkPin() {
+        if (pinEntry === data.pin) {
+          launchApp();
+        } else {
+          document.getElementById("pinDots").classList.add("shake");
+          document.getElementById("pinErr").textContent =
+            "Incorrect PIN — try again";
+          setTimeout(
+            () => document.getElementById("pinDots").classList.remove("shake"),
+            350,
+          );
+          pinEntry = "";
+          updatePinDots();
+        }
+      }
 
-// ═══════════════════════════════════════════════════
-//  SCREEN MANAGER
-// ═══════════════════════════════════════════════════
-function showScreen(id) {
-  ['screenSelect','screenSetup','screenPin'].forEach(s=>{
-    document.getElementById(s).classList.toggle('hidden',s!==id);
-  });
-  document.getElementById('app').style.display='none';
-}
-function launchApp() {
-  ['screenSelect','screenSetup','screenPin'].forEach(s=>
-    document.getElementById(s).classList.add('hidden'));
-  document.getElementById('app').style.display='block';
-  updateAccent(data.color||activeProf.color||COLORS[0]);
-  updateHeader();
-  logDate=todayStr();
-  renderCurrent();
-  clearInterval(window._syncInterval);
-  window._syncInterval=setInterval(async()=>{
-    try{const r=await gistLoad(activeProf);if(r&&r.habits){data=r;renderCurrent();}setSyncState('ok','synced');}
-    catch(e){}
-  },60000);
-}
-function showSelect() { buildUserSelect(); showScreen('screenSelect'); }
-function showSetup()  { showScreen('screenSetup'); }
-function lockAndSwitch() { clearInterval(window._syncInterval); showSelect(); }
-function updateHeader() {
-  document.getElementById('appLogo').textContent=(data.name||activeProf.name||'Habits')+"'s Habits";
-}
+      // ═══════════════════════════════════════════════════
+      //  SCREEN MANAGER
+      // ═══════════════════════════════════════════════════
+      function showScreen(id) {
+        ["screenSelect", "screenSetup", "screenPin"].forEach((s) => {
+          document.getElementById(s).classList.toggle("hidden", s !== id);
+        });
+        document.getElementById("app").style.display = "none";
+      }
+      function launchApp() {
+        ["screenSelect", "screenSetup", "screenPin"].forEach((s) =>
+          document.getElementById(s).classList.add("hidden"),
+        );
+        document.getElementById("app").style.display = "block";
+        updateAccent(data.color || activeProf.color || COLORS[0]);
+        updateHeader();
+        logDate = todayStr();
+        renderCurrent();
+        clearInterval(window._syncInterval);
+        window._syncInterval = setInterval(async () => {
+          try {
+            const r = await gistLoad(activeProf);
+            if (r && r.habits) {
+              data = r;
+              renderCurrent();
+            }
+            setSyncState("ok", "synced");
+          } catch (e) {}
+        }, 60000);
+      }
+      function showSelect() {
+        buildUserSelect();
+        showScreen("screenSelect");
+      }
+      function showSetup() {
+        showScreen("screenSetup");
+      }
+      function lockAndSwitch() {
+        clearInterval(window._syncInterval);
+        showSelect();
+      }
+      function updateHeader() {
+        document.getElementById("appLogo").textContent =
+          (data.name || activeProf.name || "Habits") + "'s Habits";
+      }
 
-// ═══════════════════════════════════════════════════
-//  USER SELECT
-// ═══════════════════════════════════════════════════
-function buildUserSelect() {
-  if(!profiles.length){ showSetup(); return; }
-  document.getElementById('userList').innerHTML=profiles.map(p=>`
+      // ═══════════════════════════════════════════════════
+      //  USER SELECT
+      // ═══════════════════════════════════════════════════
+      function buildUserSelect() {
+        if (!profiles.length) {
+          showSetup();
+          return;
+        }
+        document.getElementById("userList").innerHTML = profiles
+          .map(
+            (p) => `
     <button class="ubtn" onclick="selectUser('${p.id}')">
-      <div class="uavatar" style="background:${p.color||COLORS[0]}">${(p.name||'?')[0].toUpperCase()}</div>
+      <div class="uavatar" style="background:${p.color || COLORS[0]}">${(p.name || "?")[0].toUpperCase()}</div>
       <div class="uinfo">
-        <div class="un">${p.name||'Profile'}</div>
-        <div class="us">Gist: ${p.gist.slice(0,8)}… · ${p.pin?'🔒 PIN locked':'No PIN'}</div>
+        <div class="un">${p.name || "Profile"}</div>
+        <div class="us">Gist: ${p.gist.slice(0, 8)}… · ${p.pin ? "🔒 PIN locked" : "No PIN"}</div>
       </div>
-    </button>`).join('');
-  showScreen('screenSelect');
-}
+    </button>`,
+          )
+          .join("");
+        showScreen("screenSelect");
+      }
 
-async function selectUser(id) {
-  const prof=profiles.find(p=>p.id===id); if(!prof) return;
-  activeProf=prof;
-  try {
-    const remote=await gistLoad(prof);
-    if(remote&&remote.habits){ data=remote; }
-    else {
-      data={name:prof.name,habits:DEFAULT_HABITS(),log:{},color:prof.color||COLORS[0]};
-      await gistSave();
-    }
-    setSyncState('ok','synced');
-    prof.name=data.name||prof.name; saveProfiles();
-    if(data.pin) showPinScreen(prof);
-    else launchApp();
-  } catch(e) {
-    setSyncState('err','error');
-    showToast('⚠ Could not load Gist — check connection');
-  }
-}
+      async function selectUser(id) {
+        const prof = profiles.find((p) => p.id === id);
+        if (!prof) return;
+        activeProf = prof;
+        try {
+          const remote = await gistLoad(prof);
+          if (remote && remote.habits) {
+            data = remote;
+          } else {
+            data = {
+              name: prof.name,
+              habits: DEFAULT_HABITS(),
+              log: {},
+              color: prof.color || COLORS[0],
+            };
+            await gistSave();
+          }
+          setSyncState("ok", "synced");
+          prof.name = data.name || prof.name;
+          saveProfiles();
+          if (data.pin) showPinScreen(prof);
+          else launchApp();
+        } catch (e) {
+          setSyncState("err", "error");
+          showToast("⚠ Could not load Gist — check connection");
+        }
+      }
 
-// ═══════════════════════════════════════════════════
-//  SETUP — NEW PROFILE
-// ═══════════════════════════════════════════════════
-function initSetupColors() {
-  setupColor=COLORS[0];
-  renderColorPicker('setupColors', setupColor, (c)=>{
-    setupColor=c;
-    renderColorPicker('setupColors',c,arguments.callee);
-  });
-}
+      // ═══════════════════════════════════════════════════
+      //  SETUP — NEW PROFILE
+      // ═══════════════════════════════════════════════════
+      function initSetupColors() {
+        setupColor = COLORS[0];
+        renderColorPicker("setupColors", setupColor, (c) => {
+          setupColor = c;
+          renderColorPicker("setupColors", c, arguments.callee);
+        });
+      }
 
-async function saveSetup() {
-  const name  = document.getElementById('setupName').value.trim();
-  const token = document.getElementById('setupToken').value.trim();
-  const gist  = document.getElementById('setupGist').value.trim();
-  const pin   = document.getElementById('setupPin').value.trim();
-  const err   = document.getElementById('setupErr');
-  err.style.display='none';
-  if(!name||!token||!gist){ err.textContent='Name, token and Gist ID are all required.'; err.style.display='block'; return; }
-  if(pin&&(pin.length!==4||!/^\d{4}$/.test(pin))){ err.textContent='PIN must be exactly 4 digits (or leave blank).'; err.style.display='block'; return; }
-  // check for duplicate gist
-  if(profiles.some(p=>p.gist===gist)){ err.textContent='This Gist is already linked to another profile.'; err.style.display='block'; return; }
-  // validate gist access
-  try {
-    const r=await fetch(`https://api.github.com/gists/${gist}`,{headers:{Authorization:`token ${token}`}});
-    if(!r.ok) throw new Error();
-  } catch(e){ err.textContent='Could not connect — double-check token and Gist ID.'; err.style.display='block'; return; }
-  const id='p'+Date.now();
-  const prof={id,name,token,gist,color:setupColor};
-  profiles.push(prof);
-  saveProfiles(); // writes to localStorage AND URL hash
-  activeProf=prof;
-  data={name,habits:DEFAULT_HABITS(),log:{},color:setupColor};
-  if(pin) data.pin=pin;
-  await gistSave();
-  // clear form
-  ['setupName','setupToken','setupGist','setupPin'].forEach(f=>document.getElementById(f).value='');
-  launchApp();
-  // nudge user to bookmark
-  setTimeout(()=>showToast('✓ Profile saved — go to Manage → Copy My URL to bookmark!'), 600);
-}
+      async function saveSetup() {
+        const name = document.getElementById("setupName").value.trim();
+        const token = document.getElementById("setupToken").value.trim();
+        const gist = document.getElementById("setupGist").value.trim();
+        const pin = document.getElementById("setupPin").value.trim();
+        const err = document.getElementById("setupErr");
+        err.style.display = "none";
+        if (!name || !token || !gist) {
+          err.textContent = "Name, token and Gist ID are all required.";
+          err.style.display = "block";
+          return;
+        }
+        if (pin && (pin.length !== 4 || !/^\d{4}$/.test(pin))) {
+          err.textContent = "PIN must be exactly 4 digits (or leave blank).";
+          err.style.display = "block";
+          return;
+        }
+        // check for duplicate gist
+        if (profiles.some((p) => p.gist === gist)) {
+          err.textContent = "This Gist is already linked to another profile.";
+          err.style.display = "block";
+          return;
+        }
+        // validate gist access
+        try {
+          const r = await fetch(`https://api.github.com/gists/${gist}`, {
+            headers: { Authorization: `token ${token}` },
+          });
+          if (!r.ok) throw new Error();
+        } catch (e) {
+          err.textContent =
+            "Could not connect — double-check token and Gist ID.";
+          err.style.display = "block";
+          return;
+        }
+        const id = "p" + Date.now();
+        const prof = { id, name, token, gist, color: setupColor };
+        profiles.push(prof);
+        saveProfiles(); // writes to localStorage AND URL hash
+        activeProf = prof;
+        data = { name, habits: DEFAULT_HABITS(), log: {}, color: setupColor };
+        if (pin) data.pin = pin;
+        await gistSave();
+        // clear form
+        ["setupName", "setupToken", "setupGist", "setupPin"].forEach(
+          (f) => (document.getElementById(f).value = ""),
+        );
+        launchApp();
+        // nudge user to bookmark
+        setTimeout(
+          () =>
+            showToast(
+              "✓ Profile saved — go to Manage → Copy My URL to bookmark!",
+            ),
+          600,
+        );
+      }
 
-// ═══════════════════════════════════════════════════
-//  INIT
-// ═══════════════════════════════════════════════════
-loadProfiles();
-initSetupColors();
-if(!profiles.length) showSetup();
-else buildUserSelect();
-</script>
-</body>
+      // ═══════════════════════════════════════════════════
+      //  INIT
+      // ═══════════════════════════════════════════════════
+      loadProfiles();
+      initSetupColors();
+      if (!profiles.length) showSetup();
+      else buildUserSelect();
+    </script>
+  </body>
 </html>
